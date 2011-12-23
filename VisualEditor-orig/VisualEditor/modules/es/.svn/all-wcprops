@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svnroot/mediawiki/!svn/ver/106837/trunk/extensions/VisualEditor/modules/es
+END
+es.js
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svnroot/mediawiki/!svn/ver/105890/trunk/extensions/VisualEditor/modules/es/es.js
+END
+es.Html.js
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svnroot/mediawiki/!svn/ver/102006/trunk/extensions/VisualEditor/modules/es/es.Html.js
+END
+es.Position.js
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svnroot/mediawiki/!svn/ver/102006/trunk/extensions/VisualEditor/modules/es/es.Position.js
+END
+es.TransactionProcessor.js
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svnroot/mediawiki/!svn/ver/105745/trunk/extensions/VisualEditor/modules/es/es.TransactionProcessor.js
+END
+es.Range.js
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svnroot/mediawiki/!svn/ver/105468/trunk/extensions/VisualEditor/modules/es/es.Range.js
+END

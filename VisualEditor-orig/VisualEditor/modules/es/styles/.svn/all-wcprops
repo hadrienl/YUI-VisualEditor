@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svnroot/mediawiki/!svn/ver/106536/trunk/extensions/VisualEditor/modules/es/styles
+END
+es.SurfaceView.css
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svnroot/mediawiki/!svn/ver/105490/trunk/extensions/VisualEditor/modules/es/styles/es.SurfaceView.css
+END
+es.ContentView.css
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svnroot/mediawiki/!svn/ver/105124/trunk/extensions/VisualEditor/modules/es/styles/es.ContentView.css
+END
+es.Inspector.css
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svnroot/mediawiki/!svn/ver/105757/trunk/extensions/VisualEditor/modules/es/styles/es.Inspector.css
+END
+es.DocumentView.css
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svnroot/mediawiki/!svn/ver/105124/trunk/extensions/VisualEditor/modules/es/styles/es.DocumentView.css
+END
+es.ToolbarView.css
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svnroot/mediawiki/!svn/ver/106536/trunk/extensions/VisualEditor/modules/es/styles/es.ToolbarView.css
+END
+es.ContextView.css
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svnroot/mediawiki/!svn/ver/105734/trunk/extensions/VisualEditor/modules/es/styles/es.ContextView.css
+END
+es.MenuView.css
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svnroot/mediawiki/!svn/ver/105124/trunk/extensions/VisualEditor/modules/es/styles/es.MenuView.css
+END

@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 80
+/svnroot/mediawiki/!svn/ver/106230/trunk/extensions/VisualEditor/modules/sandbox
+END
+base.php
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svnroot/mediawiki/!svn/ver/106230/trunk/extensions/VisualEditor/modules/sandbox/base.php
+END
+sandbox.css
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svnroot/mediawiki/!svn/ver/105956/trunk/extensions/VisualEditor/modules/sandbox/sandbox.css
+END
+sandbox.js
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svnroot/mediawiki/!svn/ver/106049/trunk/extensions/VisualEditor/modules/sandbox/sandbox.js
+END
+special.js
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svnroot/mediawiki/!svn/ver/106157/trunk/extensions/VisualEditor/modules/sandbox/special.js
+END

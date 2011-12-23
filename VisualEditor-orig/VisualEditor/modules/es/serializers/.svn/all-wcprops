@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svnroot/mediawiki/!svn/ver/105489/trunk/extensions/VisualEditor/modules/es/serializers
+END
+es.HtmlSerializer.js
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svnroot/mediawiki/!svn/ver/105461/trunk/extensions/VisualEditor/modules/es/serializers/es.HtmlSerializer.js
+END
+es.WikitextSerializer.js
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svnroot/mediawiki/!svn/ver/105489/trunk/extensions/VisualEditor/modules/es/serializers/es.WikitextSerializer.js
+END
+es.JsonSerializer.js
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svnroot/mediawiki/!svn/ver/102006/trunk/extensions/VisualEditor/modules/es/serializers/es.JsonSerializer.js
+END
+es.AnnotationSerializer.js
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svnroot/mediawiki/!svn/ver/102006/trunk/extensions/VisualEditor/modules/es/serializers/es.AnnotationSerializer.js
+END

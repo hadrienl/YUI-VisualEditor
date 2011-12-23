@@ -1,0 +1,71 @@
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svnroot/mediawiki/!svn/ver/106123/trunk/extensions/VisualEditor/modules/es/models
+END
+es.DocumentModel.js
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svnroot/mediawiki/!svn/ver/106123/trunk/extensions/VisualEditor/modules/es/models/es.DocumentModel.js
+END
+es.HeadingModel.js
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svnroot/mediawiki/!svn/ver/103359/trunk/extensions/VisualEditor/modules/es/models/es.HeadingModel.js
+END
+es.TableRowModel.js
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svnroot/mediawiki/!svn/ver/103359/trunk/extensions/VisualEditor/modules/es/models/es.TableRowModel.js
+END
+es.ParagraphModel.js
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svnroot/mediawiki/!svn/ver/103359/trunk/extensions/VisualEditor/modules/es/models/es.ParagraphModel.js
+END
+es.TransactionModel.js
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svnroot/mediawiki/!svn/ver/104111/trunk/extensions/VisualEditor/modules/es/models/es.TransactionModel.js
+END
+es.PreModel.js
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svnroot/mediawiki/!svn/ver/103359/trunk/extensions/VisualEditor/modules/es/models/es.PreModel.js
+END
+es.TableCellModel.js
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svnroot/mediawiki/!svn/ver/103359/trunk/extensions/VisualEditor/modules/es/models/es.TableCellModel.js
+END
+es.TableModel.js
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svnroot/mediawiki/!svn/ver/103359/trunk/extensions/VisualEditor/modules/es/models/es.TableModel.js
+END
+es.SurfaceModel.js
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svnroot/mediawiki/!svn/ver/105962/trunk/extensions/VisualEditor/modules/es/models/es.SurfaceModel.js
+END
+es.ListItemModel.js
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svnroot/mediawiki/!svn/ver/103359/trunk/extensions/VisualEditor/modules/es/models/es.ListItemModel.js
+END
+es.ListModel.js
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svnroot/mediawiki/!svn/ver/103359/trunk/extensions/VisualEditor/modules/es/models/es.ListModel.js
+END

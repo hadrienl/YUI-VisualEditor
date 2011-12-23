@@ -1,0 +1,71 @@
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svnroot/mediawiki/!svn/ver/107062/trunk/extensions/VisualEditor/modules/parser
+END
+mediawiki.TokenTransformDispatcher.js
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svnroot/mediawiki/!svn/ver/107059/trunk/extensions/VisualEditor/modules/parser/mediawiki.TokenTransformDispatcher.js
+END
+ext.core.QuoteTransformer.js
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svnroot/mediawiki/!svn/ver/106023/trunk/extensions/VisualEditor/modules/parser/ext.core.QuoteTransformer.js
+END
+mediawiki.HTML5TreeBuilder.node.js
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svnroot/mediawiki/!svn/ver/107059/trunk/extensions/VisualEditor/modules/parser/mediawiki.HTML5TreeBuilder.node.js
+END
+mediawiki.tokenizer.peg.js
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svnroot/mediawiki/!svn/ver/105876/trunk/extensions/VisualEditor/modules/parser/mediawiki.tokenizer.peg.js
+END
+mediawiki.DOMPostProcessor.js
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svnroot/mediawiki/!svn/ver/106203/trunk/extensions/VisualEditor/modules/parser/mediawiki.DOMPostProcessor.js
+END
+ext.cite.taghook.ref.js
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svnroot/mediawiki/!svn/ver/101712/trunk/extensions/VisualEditor/modules/parser/ext.cite.taghook.ref.js
+END
+mediawiki.DOMConverter.js
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svnroot/mediawiki/!svn/ver/106468/trunk/extensions/VisualEditor/modules/parser/mediawiki.DOMConverter.js
+END
+README.txt
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svnroot/mediawiki/!svn/ver/105943/trunk/extensions/VisualEditor/modules/parser/README.txt
+END
+pegTokenizer.pegjs.txt
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svnroot/mediawiki/!svn/ver/107062/trunk/extensions/VisualEditor/modules/parser/pegTokenizer.pegjs.txt
+END
+mediawiki.parser.environment.js
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svnroot/mediawiki/!svn/ver/101712/trunk/extensions/VisualEditor/modules/parser/mediawiki.parser.environment.js
+END
+ext.Cite.js
+K 25
+svn:wc:ra_dav:version-url
+V 91
+/svnroot/mediawiki/!svn/ver/106282/trunk/extensions/VisualEditor/modules/parser/ext.Cite.js
+END

@@ -1,0 +1,89 @@
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svnroot/mediawiki/!svn/ver/106224/trunk/extensions/VisualEditor/modules/es/views
+END
+es.ContextView.js
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svnroot/mediawiki/!svn/ver/105734/trunk/extensions/VisualEditor/modules/es/views/es.ContextView.js
+END
+es.MenuView.js
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svnroot/mediawiki/!svn/ver/105715/trunk/extensions/VisualEditor/modules/es/views/es.MenuView.js
+END
+es.ParagraphView.js
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svnroot/mediawiki/!svn/ver/103351/trunk/extensions/VisualEditor/modules/es/views/es.ParagraphView.js
+END
+es.PreView.js
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svnroot/mediawiki/!svn/ver/103351/trunk/extensions/VisualEditor/modules/es/views/es.PreView.js
+END
+es.TableCellView.js
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svnroot/mediawiki/!svn/ver/103351/trunk/extensions/VisualEditor/modules/es/views/es.TableCellView.js
+END
+es.TableView.js
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svnroot/mediawiki/!svn/ver/103351/trunk/extensions/VisualEditor/modules/es/views/es.TableView.js
+END
+es.SurfaceView.js
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svnroot/mediawiki/!svn/ver/106224/trunk/extensions/VisualEditor/modules/es/views/es.SurfaceView.js
+END
+es.ContentView.js
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svnroot/mediawiki/!svn/ver/105240/trunk/extensions/VisualEditor/modules/es/views/es.ContentView.js
+END
+es.ListItemView.js
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svnroot/mediawiki/!svn/ver/105482/trunk/extensions/VisualEditor/modules/es/views/es.ListItemView.js
+END
+es.ListView.js
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svnroot/mediawiki/!svn/ver/105639/trunk/extensions/VisualEditor/modules/es/views/es.ListView.js
+END
+es.DocumentView.js
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svnroot/mediawiki/!svn/ver/103406/trunk/extensions/VisualEditor/modules/es/views/es.DocumentView.js
+END
+es.HeadingView.js
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svnroot/mediawiki/!svn/ver/105482/trunk/extensions/VisualEditor/modules/es/views/es.HeadingView.js
+END
+es.TableRowView.js
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svnroot/mediawiki/!svn/ver/103351/trunk/extensions/VisualEditor/modules/es/views/es.TableRowView.js
+END
+es.ToolbarView.js
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svnroot/mediawiki/!svn/ver/105956/trunk/extensions/VisualEditor/modules/es/views/es.ToolbarView.js
+END

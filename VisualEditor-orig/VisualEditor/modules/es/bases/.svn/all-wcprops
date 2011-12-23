@@ -1,0 +1,77 @@
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svnroot/mediawiki/!svn/ver/105757/trunk/extensions/VisualEditor/modules/es/bases
+END
+es.DocumentViewNode.js
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svnroot/mediawiki/!svn/ver/103578/trunk/extensions/VisualEditor/modules/es/bases/es.DocumentViewNode.js
+END
+es.DocumentBranchNode.js
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svnroot/mediawiki/!svn/ver/103478/trunk/extensions/VisualEditor/modules/es/bases/es.DocumentBranchNode.js
+END
+es.DocumentModelBranchNode.js
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svnroot/mediawiki/!svn/ver/103185/trunk/extensions/VisualEditor/modules/es/bases/es.DocumentModelBranchNode.js
+END
+es.DocumentNode.js
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svnroot/mediawiki/!svn/ver/104170/trunk/extensions/VisualEditor/modules/es/bases/es.DocumentNode.js
+END
+es.DocumentModelNode.js
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svnroot/mediawiki/!svn/ver/105213/trunk/extensions/VisualEditor/modules/es/bases/es.DocumentModelNode.js
+END
+es.Inspector.js
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svnroot/mediawiki/!svn/ver/105757/trunk/extensions/VisualEditor/modules/es/bases/es.Inspector.js
+END
+es.DocumentViewLeafNode.js
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svnroot/mediawiki/!svn/ver/103274/trunk/extensions/VisualEditor/modules/es/bases/es.DocumentViewLeafNode.js
+END
+es.EventEmitter.js
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svnroot/mediawiki/!svn/ver/103203/trunk/extensions/VisualEditor/modules/es/bases/es.EventEmitter.js
+END
+es.DocumentLeafNode.js
+K 25
+svn:wc:ra_dav:version-url
+V 104
+/svnroot/mediawiki/!svn/ver/102878/trunk/extensions/VisualEditor/modules/es/bases/es.DocumentLeafNode.js
+END
+es.DocumentModelLeafNode.js
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svnroot/mediawiki/!svn/ver/105209/trunk/extensions/VisualEditor/modules/es/bases/es.DocumentModelLeafNode.js
+END
+es.DocumentViewBranchNode.js
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svnroot/mediawiki/!svn/ver/103493/trunk/extensions/VisualEditor/modules/es/bases/es.DocumentViewBranchNode.js
+END
+es.Tool.js
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svnroot/mediawiki/!svn/ver/105721/trunk/extensions/VisualEditor/modules/es/bases/es.Tool.js
+END

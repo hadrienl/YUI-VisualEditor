@@ -1,0 +1,43 @@
+10
+
+dir
+107140
+http://svn.wikimedia.org/svnroot/mediawiki/trunk/extensions/VisualEditor/modules
+http://svn.wikimedia.org/svnroot/mediawiki
+
+
+
+2011-12-22T12:37:24.853919Z
+107062
+gwicke
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+dd0e9695-b195-4be7-bd10-2dea1a65a6b6
+
+jquery
+dir
+
+qunit
+dir
+
+es
+dir
+
+parser
+dir
+
+sandbox
+dir
+

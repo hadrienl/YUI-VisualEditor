@@ -1,0 +1,143 @@
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svnroot/mediawiki/!svn/ver/104567/trunk/extensions/VisualEditor/modules/parser/html5/parser
+END
+before_html_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/parser/before_html_phase.js
+END
+in_head_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svnroot/mediawiki/!svn/ver/104567/trunk/extensions/VisualEditor/modules/parser/html5/parser/in_head_phase.js
+END
+after_frameset_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 116
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/parser/after_frameset_phase.js
+END
+initial_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/parser/initial_phase.js
+END
+in_table_body_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 115
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/parser/in_table_body_phase.js
+END
+in_frameset_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/parser/in_frameset_phase.js
+END
+root_element_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/parser/root_element_phase.js
+END
+in_row_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/parser/in_row_phase.js
+END
+in_column_group_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 117
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/parser/in_column_group_phase.js
+END
+after_after_body_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 118
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/parser/after_after_body_phase.js
+END
+trailing_end_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 114
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/parser/trailing_end_phase.js
+END
+in_select_in_table_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/parser/in_select_in_table_phase.js
+END
+in_cell_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/parser/in_cell_phase.js
+END
+in_select_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 111
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/parser/in_select_phase.js
+END
+after_after_frameset_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 122
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/parser/after_after_frameset_phase.js
+END
+in_foreign_content_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 120
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/parser/in_foreign_content_phase.js
+END
+in_table_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 110
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/parser/in_table_phase.js
+END
+after_body_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/parser/after_body_phase.js
+END
+phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 101
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/parser/phase.js
+END
+after_head_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svnroot/mediawiki/!svn/ver/104567/trunk/extensions/VisualEditor/modules/parser/html5/parser/after_head_phase.js
+END
+in_caption_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 112
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/parser/in_caption_phase.js
+END
+in_body_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svnroot/mediawiki/!svn/ver/104567/trunk/extensions/VisualEditor/modules/parser/html5/parser/in_body_phase.js
+END
+before_head_phase.js
+K 25
+svn:wc:ra_dav:version-url
+V 113
+/svnroot/mediawiki/!svn/ver/104567/trunk/extensions/VisualEditor/modules/parser/html5/parser/before_head_phase.js
+END

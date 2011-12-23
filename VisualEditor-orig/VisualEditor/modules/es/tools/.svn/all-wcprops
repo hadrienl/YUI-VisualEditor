@@ -1,0 +1,53 @@
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svnroot/mediawiki/!svn/ver/106124/trunk/extensions/VisualEditor/modules/es/tools
+END
+es.ClearButtonTool.js
+K 25
+svn:wc:ra_dav:version-url
+V 103
+/svnroot/mediawiki/!svn/ver/105721/trunk/extensions/VisualEditor/modules/es/tools/es.ClearButtonTool.js
+END
+es.FormatDropdownTool.js
+K 25
+svn:wc:ra_dav:version-url
+V 106
+/svnroot/mediawiki/!svn/ver/105721/trunk/extensions/VisualEditor/modules/es/tools/es.FormatDropdownTool.js
+END
+es.AnnotationButtonTool.js
+K 25
+svn:wc:ra_dav:version-url
+V 108
+/svnroot/mediawiki/!svn/ver/106124/trunk/extensions/VisualEditor/modules/es/tools/es.AnnotationButtonTool.js
+END
+es.ListButtonTool.js
+K 25
+svn:wc:ra_dav:version-url
+V 102
+/svnroot/mediawiki/!svn/ver/105738/trunk/extensions/VisualEditor/modules/es/tools/es.ListButtonTool.js
+END
+es.IndentationButtonTool.js
+K 25
+svn:wc:ra_dav:version-url
+V 109
+/svnroot/mediawiki/!svn/ver/105721/trunk/extensions/VisualEditor/modules/es/tools/es.IndentationButtonTool.js
+END
+es.ButtonTool.js
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svnroot/mediawiki/!svn/ver/105721/trunk/extensions/VisualEditor/modules/es/tools/es.ButtonTool.js
+END
+es.DropdownTool.js
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svnroot/mediawiki/!svn/ver/105721/trunk/extensions/VisualEditor/modules/es/tools/es.DropdownTool.js
+END
+es.HistoryButtonTool.js
+K 25
+svn:wc:ra_dav:version-url
+V 105
+/svnroot/mediawiki/!svn/ver/105721/trunk/extensions/VisualEditor/modules/es/tools/es.HistoryButtonTool.js
+END

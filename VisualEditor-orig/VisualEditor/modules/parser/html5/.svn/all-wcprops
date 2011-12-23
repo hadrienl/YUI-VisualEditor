@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svnroot/mediawiki/!svn/ver/105535/trunk/extensions/VisualEditor/modules/parser/html5
+END
+treewalker.js
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/treewalker.js
+END
+debug.js
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/debug.js
+END
+treebuilder.js
+K 25
+svn:wc:ra_dav:version-url
+V 100
+/svnroot/mediawiki/!svn/ver/104567/trunk/extensions/VisualEditor/modules/parser/html5/treebuilder.js
+END
+index.js
+K 25
+svn:wc:ra_dav:version-url
+V 94
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/index.js
+END
+buffer.js
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/buffer.js
+END
+serializer.js
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svnroot/mediawiki/!svn/ver/104567/trunk/extensions/VisualEditor/modules/parser/html5/serializer.js
+END
+tokenizer.js
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/tokenizer.js
+END
+constants.js
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svnroot/mediawiki/!svn/ver/103585/trunk/extensions/VisualEditor/modules/parser/html5/constants.js
+END
+parser.js
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svnroot/mediawiki/!svn/ver/105535/trunk/extensions/VisualEditor/modules/parser/html5/parser.js
+END
+COPYING
+K 25
+svn:wc:ra_dav:version-url
+V 93
+/svnroot/mediawiki/!svn/ver/103653/trunk/extensions/VisualEditor/modules/parser/html5/COPYING
+END
