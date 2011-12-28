@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<script type="text/javascript" src="../../../yui3/build/yui/yui-min.js"></script>
+</head>
+<body class="yui3-skin-sam">
+<h3>Visual Editor</h3>
+<div id="mychart"></div>
+<script type="text/javascript" src="http://yui.yahooapis.com/3.1.2/build/yui/yui-min.js"></script>
+
+<script type="text/javascript" src="es-document-branch-node.test.js"></script>
+<script type="text/javascript" src="es-document-model-branch-node.test.js"></script>
+<script type="text/javascript" src="es-document-model.test.js"></script>
+<script type="text/javascript" src="es-test-data.js"></script>
+<script type="text/javascript" src="es.test.js"></script>
+<script type="text/javascript" src="es-transaction-processor.test.js"></script>
+
+<script type="text/javascript">
+YUI().use("console", "test", function (Y)
+{
+    var r = new Y.Console({
+        newestOnTop : false,
+        style: 'block' // to anchor in the example content
+    });
+
+    r.render('#testLogger');
+
+    //run the tests
+    Y.Test.Runner.run();
+});
+</script>
+</body>
+</html>
