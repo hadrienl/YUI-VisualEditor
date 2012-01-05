@@ -50,7 +50,6 @@ es.ToolbarView.prototype.setup = function() {
 
 		for ( var j = 0; j < this.config[i].items.length; j++ ) {
 			var toolDefintion = es.Tool.tools[ this.config[i].items[j] ];
-			console.debug(toolDefintion);
 			
 			if ( toolDefintion ) {
 				var tool = new toolDefintion.constructor(
