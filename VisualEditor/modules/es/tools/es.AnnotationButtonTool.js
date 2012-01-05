@@ -80,6 +80,23 @@ es.Tool.tools.link = {
 	}
 };
 
+es.Tool.tools.strong = {
+	'constructor': es.AnnotationButtonTool,
+	'name': 'strong',
+	'title': 'Strong (ctrl/cmd + B)',
+	'data': {
+		'annotation': { 'type': 'textStyle/strong' }
+	}
+};
+es.Tool.tools.em = {
+	'constructor': es.AnnotationButtonTool,
+	'name': 'em',
+	'title': 'Emphase (ctrl/cmd + I)',
+	'data': {
+		'annotation': { 'type': 'textStyle/emphasize' }
+	}
+};
+
 /* Inheritance */
 
 es.extendClass( es.AnnotationButtonTool, es.ButtonTool );

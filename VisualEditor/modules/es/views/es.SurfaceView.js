@@ -624,11 +624,11 @@ es.SurfaceView.prototype.onKeyDown = function( e ) {
 						return false;
 					// b (bold)
 					case 66:
-						this.annotate( 'toggle', {'type': 'textStyle/bold' } );
+						this.annotate( 'toggle', {'type': 'textStyle/strong' } );
 						return false;
 					// i (italic)
 					case 73:
-						this.annotate( 'toggle', {'type': 'textStyle/italic' } );
+						this.annotate( 'toggle', {'type': 'textStyle/emphasize' } );
 						return false;
 					// k (hyperlink)
 					case 75:

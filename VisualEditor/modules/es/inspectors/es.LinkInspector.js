@@ -13,7 +13,7 @@ es.LinkInspector = function( toolbar, context ) {
 	this.$clearButton = $( '<div class="es-inspector-button es-inspector-clearButton"></div>' )
 		.prependTo( this.$ );
 	this.$.prepend( '<div class="es-inspector-title">Edit link</div>' );
-	this.$locationLabel = $( '<label>Page title</label>' ).appendTo( this.$form );
+	this.$locationLabel = $( '<label>URL :</label>' ).appendTo( this.$form );
 	this.$locationInput = $( '<input type="text">' ).appendTo( this.$form );
 	this.initialValue = null;
 
@@ -43,6 +43,13 @@ es.LinkInspector = function( toolbar, context ) {
 			}
 		}, 0 );
 	} );
+	
+	this.$locationInput.bind( 'focus', function() {
+	   if (_this.$locationInput.val() === '')
+	   {
+	       _this.$locationInput.val('http://');
+	   }
+    });
 };
 
 /* Methods */

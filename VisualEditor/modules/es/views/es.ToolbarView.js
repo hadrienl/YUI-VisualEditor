@@ -25,7 +25,7 @@ es.ToolbarView = function( $container, surfaceView, config ) {
 	this.config = config || [
 		{ 'name': 'history', 'items' : ['undo', 'redo'] },
 		{ 'name': 'textStyle', 'items' : ['format'] },
-		{ 'name': 'textStyle', 'items' : ['bold', 'italic', 'link', 'clear'] },
+		{ 'name': 'textStyle', 'items' : ['strong', 'em', 'link', 'clear'] },
 		{ 'name': 'list', 'items' : ['number', 'bullet', 'outdent', 'indent'] }
 	];
 	this.setup();
@@ -50,6 +50,8 @@ es.ToolbarView.prototype.setup = function() {
 
 		for ( var j = 0; j < this.config[i].items.length; j++ ) {
 			var toolDefintion = es.Tool.tools[ this.config[i].items[j] ];
+			console.debug(toolDefintion);
+			
 			if ( toolDefintion ) {
 				var tool = new toolDefintion.constructor(
 					this, toolDefintion.name, toolDefintion.title, toolDefintion.data
