@@ -171,7 +171,7 @@ es.SurfaceView = function( $container, model ) {
 	this.ie8 = $.browser.msie && $.browser.version === "8.0";
 
 	// Initialization
-	this.$input.focus();
+	//this.$input.focus();
 	this.documentView.renderContent();
 };
 
