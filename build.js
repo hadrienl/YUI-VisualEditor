@@ -8,7 +8,68 @@ BUILDDIR = __dirname+'/build/',
 YUICOMPRESSORPATH = __dirname+'/../yuicompressor/build/yuicompressor-2.4.8pre.jar',
 
 jquery = 'jquery',
-modules = ['es', 'es/bases', 'es/inspectors', 'es/models', 'es/serializers', 'es/tools', 'es/views'],
+modules = ['es/es.js',
+'es/es.Html.js',
+'es/es.Position.js',
+'es/es.Range.js',
+'es/es.TransactionProcessor.js',
+ 
+'es/serializers/es.AnnotationSerializer.js',
+'es/serializers/es.HtmlSerializer.js',
+'es/serializers/es.JsonSerializer.js',
+'es/serializers/es.WikitextSerializer.js',
+
+'es/bases/es.EventEmitter.js',
+'es/bases/es.DocumentNode.js',
+'es/bases/es.DocumentModelNode.js',
+'es/bases/es.DocumentBranchNode.js',
+'es/bases/es.DocumentLeafNode.js',
+'es/bases/es.DocumentModelBranchNode.js',
+'es/bases/es.DocumentModelLeafNode.js',
+'es/bases/es.DocumentViewNode.js',
+'es/bases/es.DocumentViewBranchNode.js',
+'es/bases/es.DocumentViewLeafNode.js',
+'es/bases/es.Inspector.js',
+'es/bases/es.Tool.js',
+
+'es/models/es.SurfaceModel.js',
+'es/models/es.DocumentModel.js',
+'es/models/es.ParagraphModel.js',
+'es/models/es.PreModel.js',
+'es/models/es.ListModel.js',
+'es/models/es.ListItemModel.js',
+'es/models/es.TableModel.js',
+'es/models/es.TableRowModel.js',
+'es/models/es.TableCellModel.js',
+'es/models/es.HeadingModel.js',
+'es/models/es.TransactionModel.js',
+
+'es/inspectors/es.LinkInspector.js',
+
+'es/tools/es.ButtonTool.js',
+'es/tools/es.AnnotationButtonTool.js',
+'es/tools/es.ClearButtonTool.js',
+'es/tools/es.HistoryButtonTool.js',
+'es/tools/es.ListButtonTool.js',
+'es/tools/es.IndentationButtonTool.js',
+'es/tools/es.DropdownTool.js',
+'es/tools/es.FormatDropdownTool.js',
+
+'es/views/es.SurfaceView.js',
+'es/views/es.ToolbarView.js',
+'es/views/es.ContentView.js',
+'es/views/es.ContextView.js',
+'es/views/es.DocumentView.js',
+'es/views/es.ParagraphView.js',
+'es/views/es.PreView.js',
+'es/views/es.ListView.js',
+'es/views/es.MenuView.js',
+'es/views/es.ListItemView.js',
+'es/views/es.TableView.js',
+'es/views/es.TableRowView.js',
+'es/views/es.TableCellView.js',
+'es/views/es.HeadingView.js'],
+
 images = ['es/images'],
 styles = ['es/styles'],
 
@@ -26,23 +87,11 @@ catch (e)
     console.error(e);
 }
 modules.forEach(
-    function(path)
+    function(file)
     {
-        var files = fs.readdirSync(BASEPATH+path);
+        var filepath = BASEPATH+file;
         
-        files.forEach(
-            function(file)
-            {
-                var filepath = BASEPATH+path+'/'+file;
-                
-                if (!fs.statSync(filepath).isFile())
-                {
-                    return;
-                }
-                
-                all += fs.readFileSync(filepath);
-            }
-        );
+        all += fs.readFileSync(filepath);
     }
 );
 fs.writeFileSync(

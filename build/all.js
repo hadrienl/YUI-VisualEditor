@@ -214,98 +214,6 @@ es.repeatString = function( pattern, count ) {
 	return result;
 };
 /**
- * Range of content.
- * 
- * @class
- * @constructor
- * @param from {Integer} Starting offset
- * @param to {Integer} Ending offset
- * @property from {Integer} Starting offset
- * @property to {Integer} Ending offset
- * @property start {Integer} Normalized starting offset
- * @property end {Integer} Normalized ending offset
- */
-es.Range = function( from, to ) {
-	this.from = from || 0;
-	this.to = typeof to === 'undefined' ? this.from : to;
-	this.normalize();
-};
-
-/**
- * Creates a new es.Range object that's a translated version of another.
- * 
- * @method
- * @param {es.Range} range Range to base new range on
- * @param {Integer} distance Distance to move range by
- * @returns {es.Range} New translated range
- */
-es.Range.newFromTranslatedRange = function( range, distance ) {
-	return new es.Range( range.from + distance, range.to + distance );
-};
-
-/* Methods */
-
-/**
- * Gets a clone of this object.
- * 
- * @method
- * @returns {es.Range} Clone of range
- */
-es.Range.prototype.clone = function() {
-	return new es.Range( this.from, this.to );
-};
-
-/**
- * Checks if an offset is within this range.
- * 
- * @method
- * @param offset {Integer} Offset to check
- * @returns {Boolean} If offset is within this range
- */
-es.Range.prototype.containsOffset = function( offset ) {
-	this.normalize();
-	return offset >= this.start && offset < this.end;
-};
-
-/**
- * Gets the length of the range.
- * 
- * @method
- * @returns {Integer} Length of range
- */
-es.Range.prototype.getLength = function() {
-	return Math.abs( this.from - this.to );
-};
-
-/**
- * Sets start and end properties, ensuring start is always before end.
- * 
- * This should always be called before using the start or end properties. Do not call this unless
- * you are about to use these properties.
- * 
- * @method
- */
-es.Range.prototype.normalize = function() {
-	if ( this.from < this.to ) {
-		this.start = this.from;
-		this.end = this.to;
-	} else {
-		this.start = this.to;
-		this.end = this.from;
-	}
-};
-
-/**
- * Determines if two Ranges are equal. Direction counts.
- *
- * @method
- * @param {es.Range}
- * @returns {Boolean}
- */
-es.Range.prototype.equals = function( other ) {
-	return this.from === other.from && this.to === other.to;
-};
-/**
  * Static object with HTML generation helpers.
  */
 es.Html = {
@@ -562,6 +470,98 @@ es.Position.prototype.leftOf = function( left ) {
  */
 es.Position.prototype.rightOf = function( left ) {
 	return this.left > left;
+};
+/**
+ * Range of content.
+ * 
+ * @class
+ * @constructor
+ * @param from {Integer} Starting offset
+ * @param to {Integer} Ending offset
+ * @property from {Integer} Starting offset
+ * @property to {Integer} Ending offset
+ * @property start {Integer} Normalized starting offset
+ * @property end {Integer} Normalized ending offset
+ */
+es.Range = function( from, to ) {
+	this.from = from || 0;
+	this.to = typeof to === 'undefined' ? this.from : to;
+	this.normalize();
+};
+
+/**
+ * Creates a new es.Range object that's a translated version of another.
+ * 
+ * @method
+ * @param {es.Range} range Range to base new range on
+ * @param {Integer} distance Distance to move range by
+ * @returns {es.Range} New translated range
+ */
+es.Range.newFromTranslatedRange = function( range, distance ) {
+	return new es.Range( range.from + distance, range.to + distance );
+};
+
+/* Methods */
+
+/**
+ * Gets a clone of this object.
+ * 
+ * @method
+ * @returns {es.Range} Clone of range
+ */
+es.Range.prototype.clone = function() {
+	return new es.Range( this.from, this.to );
+};
+
+/**
+ * Checks if an offset is within this range.
+ * 
+ * @method
+ * @param offset {Integer} Offset to check
+ * @returns {Boolean} If offset is within this range
+ */
+es.Range.prototype.containsOffset = function( offset ) {
+	this.normalize();
+	return offset >= this.start && offset < this.end;
+};
+
+/**
+ * Gets the length of the range.
+ * 
+ * @method
+ * @returns {Integer} Length of range
+ */
+es.Range.prototype.getLength = function() {
+	return Math.abs( this.from - this.to );
+};
+
+/**
+ * Sets start and end properties, ensuring start is always before end.
+ * 
+ * This should always be called before using the start or end properties. Do not call this unless
+ * you are about to use these properties.
+ * 
+ * @method
+ */
+es.Range.prototype.normalize = function() {
+	if ( this.from < this.to ) {
+		this.start = this.from;
+		this.end = this.to;
+	} else {
+		this.start = this.to;
+		this.end = this.from;
+	}
+};
+
+/**
+ * Determines if two Ranges are equal. Direction counts.
+ *
+ * @method
+ * @param {es.Range}
+ * @returns {Boolean}
+ */
+es.Range.prototype.equals = function( other ) {
+	return this.from === other.from && this.to === other.to;
 };
 /**
  * Creates an es.TransactionProcessor object.
@@ -1042,285 +1042,669 @@ es.TransactionProcessor.prototype.mark = function( op, invert ) {
 	}
 };
 /**
- * Creates an es.DocumentLeafNode object.
+ * Creates an annotation renderer object.
  * 
  * @class
- * @abstract
  * @constructor
+ * @property annotations {Object} List of annotations to be applied
  */
-es.DocumentLeafNode = function() {
-	//
+es.AnnotationSerializer = function() {
+	this.annotations = {};
 };
 
-/* Methods */
+/* Static Methods */
 
 /**
- * Checks if this node has child nodes.
+ * Adds a set of annotations to be inserted around a range of text.
+ * 
+ * Insertions for the same range will be nested in order of declaration.
+ * @example
+ *     stack = new es.AnnotationSerializer();
+ *     stack.add( new es.Range( 1, 2 ), '[', ']' );
+ *     stack.add( new es.Range( 1, 2 ), '{', '}' );
+ *     // Outputs: "a[{b}]c"
+ *     console.log( stack.render( 'abc' ) );
  * 
  * @method
- * @see {es.DocumentNode.prototype.hasChildren}
- * @returns {Boolean} Whether this node has children
+ * @param {es.Range} range Range to insert text around
+ * @param {String} pre Text to insert before range
+ * @param {String} post Text to insert after range
  */
-es.DocumentLeafNode.prototype.hasChildren = function() {
-	return false;
+es.AnnotationSerializer.prototype.add = function( range, pre, post ) {
+	// Normalize the range if it can be normalized
+	if ( typeof range.normalize === 'function' ) {
+		range.normalize();
+	}
+	if ( !( range.start in this.annotations ) ) {
+		this.annotations[range.start] = [pre];
+	} else {
+		this.annotations[range.start].push( pre );
+	}
+	if ( !( range.end in this.annotations ) ) {
+		this.annotations[range.end] = [post];
+	} else {
+		this.annotations[range.end].unshift( post );
+	}
 };
-/**
- * Creates an es.DocumentModelBranchNode object.
- * 
- * @class
- * @abstract
- * @constructor
- * @extends {es.DocumentBranchNode}
- * @extends {es.DocumentModelNode}
- * @param {String} type Symbolic name of node type
- * @param {Object} element Element object in document data
- * @param {es.DocumentModelBranchNode[]} [contents] List of child nodes to append
- */
-es.DocumentModelBranchNode = function( type, element, contents ) {
-	// Inheritance
-	es.DocumentBranchNode.call( this );
-	es.DocumentModelNode.call( this, type, element, 0 );
 
-	// Child nodes
-	if ( es.isArray( contents ) ) {
-		for ( var i = 0; i < contents.length; i++ ) {
-			this.push( contents[i] );
+/**
+ * Adds a set of HTML tags to be inserted around a range of text.
+ * 
+ * @method
+ * @param {es.Range} range Range to insert text around
+ * @param {String} type Tag name
+ * @param {Object} [attributes] List of HTML attributes
+ */
+es.AnnotationSerializer.prototype.addTags = function( range, type, attributes ) {
+	this.add( range, es.Html.makeOpeningTag( type, attributes ), es.Html.makeClosingTag( type ) );
+};
+
+/**
+ * Renders annotations into text.
+ * 
+ * @method
+ * @param {String} text Text to apply annotations to
+ * @returns {String} Wrapped text
+ */
+es.AnnotationSerializer.prototype.render = function( text ) {
+	var out = '';
+	for ( var i = 0, length = text.length; i <= length; i++ ) {
+		if ( i in this.annotations ) {
+			out += this.annotations[i].join( '' );
+		}
+		if ( i < length ) {
+			out += text[i];
 		}
 	}
+	return out;
 };
-
-/* Methods */
-
 /**
- * Gets a plain object representation of the document's data.
- * 
- * @method
- * @see {es.DocumentModelNode.getPlainObject}
- * @see {es.DocumentModel.newFromPlainObject}
- * @returns {Object} Plain object representation
- */
-es.DocumentModelBranchNode.prototype.getPlainObject = function() {
-	var obj = { 'type': this.type };
-	if ( this.element && this.element.attributes ) {
-		obj.attributes = es.copyObject( this.element.attributes );
-	}
-	obj.children = [];
-	for ( var i = 0; i < this.children.length; i++ ) {
-		obj.children.push( this.children[i].getPlainObject() );
-	}
-	return obj;
-};
-
-/**
- * Adds a node to the end of this node's children.
- * 
- * @method
- * @param {es.DocumentModelBranchNode} childModel Item to add
- * @returns {Integer} New number of children
- * @emits beforePush (childModel)
- * @emits afterPush (childModel)
- * @emits update
- */
-es.DocumentModelBranchNode.prototype.push = function( childModel ) {
-	this.emit( 'beforePush', childModel );
-	childModel.attach( this );
-	childModel.on( 'update', this.emitUpdate );
-	this.children.push( childModel );
-	this.adjustContentLength( childModel.getElementLength(), true );
-	this.emit( 'afterPush', childModel );
-	this.emit( 'update' );
-	return this.children.length;
-};
-
-/**
- * Adds a node to the beginning of this node's children.
- * 
- * @method
- * @param {es.DocumentModelBranchNode} childModel Item to add
- * @returns {Integer} New number of children
- * @emits beforeUnshift (childModel)
- * @emits afterUnshift (childModel)
- * @emits update
- */
-es.DocumentModelBranchNode.prototype.unshift = function( childModel ) {
-	this.emit( 'beforeUnshift', childModel );
-	childModel.attach( this );
-	childModel.on( 'update', this.emitUpdate );
-	this.children.unshift( childModel );
-	this.adjustContentLength( childModel.getElementLength(), true );
-	this.emit( 'afterUnshift', childModel );
-	this.emit( 'update' );
-	return this.children.length;
-};
-
-/**
- * Removes a node from the end of this node's children
- * 
- * @method
- * @returns {es.DocumentModelBranchNode} Removed childModel
- * @emits beforePop
- * @emits afterPop
- * @emits update
- */
-es.DocumentModelBranchNode.prototype.pop = function() {
-	if ( this.children.length ) {
-		this.emit( 'beforePop' );
-		var childModel = this.children[this.children.length - 1];
-		childModel.detach();
-		childModel.removeListener( 'update', this.emitUpdate );
-		this.children.pop();
-		this.adjustContentLength( -childModel.getElementLength(), true );
-		this.emit( 'afterPop' );
-		this.emit( 'update' );
-		return childModel;
-	}
-};
-
-/**
- * Removes a node from the beginning of this node's children
- * 
- * @method
- * @returns {es.DocumentModelBranchNode} Removed childModel
- * @emits beforeShift
- * @emits afterShift
- * @emits update
- */
-es.DocumentModelBranchNode.prototype.shift = function() {
-	if ( this.children.length ) {
-		this.emit( 'beforeShift' );
-		var childModel = this.children[0];
-		childModel.detach();
-		childModel.removeListener( 'update', this.emitUpdate );
-		this.children.shift();
-		this.adjustContentLength( -childModel.getElementLength(), true );
-		this.emit( 'afterShift' );
-		this.emit( 'update' );
-		return childModel;
-	}
-};
-
-/**
- * Adds and removes nodes from this node's children.
- * 
- * @method
- * @param {Integer} index Index to remove and or insert nodes at
- * @param {Integer} howmany Number of nodes to remove
- * @param {es.DocumentModelBranchNode} [...] Variadic list of nodes to insert
- * @returns {es.DocumentModelBranchNode[]} Removed nodes
- * @emits beforeSplice (index, howmany, [...])
- * @emits afterSplice (index, howmany, [...])
- * @emits update
- */
-es.DocumentModelBranchNode.prototype.splice = function( index, howmany ) {
-	var i,
-		length,
-		args = Array.prototype.slice.call( arguments, 0 ),
-		diff = 0;
-	this.emit.apply( this, ['beforeSplice'].concat( args ) );
-	if ( args.length >= 3 ) {
-		for ( i = 2, length = args.length; i < length; i++ ) {
-			args[i].attach( this );
-			args[i].on( 'update', this.emitUpdate );
-			diff += args[i].getElementLength();
-		}
-	}
-	var removals = this.children.splice.apply( this.children, args );
-	for ( i = 0, length = removals.length; i < length; i++ ) {
-		removals[i].detach();
-		removals[i].removeListener( 'update', this.emitUpdate );
-		diff -= removals[i].getElementLength();
-	}
-	this.adjustContentLength( diff, true );
-	this.emit.apply( this, ['afterSplice'].concat( args ) );
-	this.emit( 'update' );
-	return removals;
-};
-
-/**
- * Sorts this node's children.
- * 
- * @method
- * @param {Function} sortfunc Function to use when sorting
- * @emits beforeSort (sortfunc)
- * @emits afterSort (sortfunc)
- * @emits update
- */
-es.DocumentModelBranchNode.prototype.sort = function( sortfunc ) {
-	this.emit( 'beforeSort', sortfunc );
-	this.children.sort( sortfunc );
-	this.emit( 'afterSort', sortfunc );
-	this.emit( 'update' );
-};
-
-/**
- * Reverses the order of this node's children.
- * 
- * @method
- * @emits beforeReverse
- * @emits afterReverse
- * @emits update
- */
-es.DocumentModelBranchNode.prototype.reverse = function() {
-	this.emit( 'beforeReverse' );
-	this.children.reverse();
-	this.emit( 'afterReverse' );
-	this.emit( 'update' );
-};
-
-/**
- * Sets the root node to this and all of it's children.
- * 
- * @method
- * @see {es.DocumentModelNode.prototype.setRoot}
- * @param {es.DocumentModelNode} root Node to use as root
- */
-es.DocumentModelBranchNode.prototype.setRoot = function( root ) {
-	this.root = root;
-	for ( var i = 0; i < this.children.length; i++ ) {
-		this.children[i].setRoot( root );
-	}
-};
-
-/**
- * Clears the root node from this and all of it's children.
- * 
- * @method
- * @see {es.DocumentModelNode.prototype.clearRoot}
- */
-es.DocumentModelBranchNode.prototype.clearRoot = function() {
-	this.root = null;
-	for ( var i = 0; i < this.children.length; i++ ) {
-		this.children[i].clearRoot();
-	}
-};
-
-/* Inheritance */
-
-es.extendClass( es.DocumentModelBranchNode, es.DocumentBranchNode );
-es.extendClass( es.DocumentModelBranchNode, es.DocumentModelNode );
-/**
- * Creates an es.Tool object.
+ * Serializes a WikiDom plain object into an HTML string.
  * 
  * @class
  * @constructor
- * @param {es.ToolbarView} toolbar
- * @param {String} name
+ * @param {Object} options List of options for serialization
  */
-es.Tool = function( toolbar, name, title ) {
-	this.toolbar = toolbar;
-	this.name = name;
-	this.title = title;
-	this.$ = $( '<div class="es-tool"></div>' ).attr( 'title', this.title );
+es.HtmlSerializer = function( options ) {
+	this.options = $.extend( {
+		// defaults
+	}, options || {} );
 };
 
-/* Static Members */
+/* Static Methods */
 
-es.Tool.tools = {};
+/**
+ * Get a serialized version of data.
+ * 
+ * @static
+ * @method
+ * @param {Object} data Data to serialize
+ * @param {Object} options Options to use, @see {es.WikitextSerializer} for details
+ * @returns {String} Serialized version of data
+ */
+es.HtmlSerializer.stringify = function( data, options ) {
+	return ( new es.HtmlSerializer( options ) ).document( data );
+};
+
+es.HtmlSerializer.getHtmlAttributes = function( attributes ) {
+	var htmlAttributes = {},
+		count = 0;
+	for ( var key in attributes ) {
+		if ( key.indexOf( 'html/' ) === 0 ) {
+			htmlAttributes[key.substr( 5 )] = attributes[key];
+			count++;
+		}
+	}
+	return count ? htmlAttributes : null;
+};
 
 /* Methods */
 
-es.Tool.prototype.updateState = function() {
-	throw 'Tool.updateState not implemented in this subclass:' + this.constructor;
+es.HtmlSerializer.prototype.document = function( node, rawFirstParagraph ) {
+	var lines = [];
+	for ( var i = 0, length = node.children.length; i < length; i++ ) {
+		var childNode = node.children[i];
+		if ( childNode.type in this ) {
+			// Special case for paragraphs which have particular wrapping needs
+			if ( childNode.type === 'paragraph' ) {
+				lines.push( this.paragraph( childNode, rawFirstParagraph && i === 0 ) );
+			} else {
+				lines.push( this[childNode.type].call( this, childNode ) );
+			}
+		}
+	}
+	return lines.join( '\n' );
+};
+
+es.HtmlSerializer.prototype.comment = function( node ) {
+	return '<!--(' + node.text + ')-->';
+};
+
+es.HtmlSerializer.prototype.pre = function( node ) {
+	return es.Html.makeTag(
+		'pre', {}, this.content( node.content, true )
+	);
+};
+
+es.HtmlSerializer.prototype.horizontalRule = function( node ) {
+	return es.Html.makeTag( 'hr', {}, false );
+};
+
+es.HtmlSerializer.prototype.heading = function( node ) {
+	return es.Html.makeTag(
+		'h' + node.attributes.level, {}, this.content( node.content )
+	);
+};
+
+es.HtmlSerializer.prototype.paragraph = function( node, raw ) {
+	if ( raw ) {
+		return this.content( node.content );
+	} else {
+		return es.Html.makeTag( 'p', {}, this.content( node.content ) );
+	}
+};
+
+es.HtmlSerializer.prototype.list = function( node ) {
+	var out = [],    // List of list nodes
+		bstack = [], // Bullet stack, previous element's listStyles
+		bnext  = [], // Next element's listStyles
+		closeTags  = []; // Stack of close tags for currently active lists
+
+	function commonPrefixLength( x, y ) {
+		var minLength = Math.min(x.length, y.length);
+		for(var i = 0; i < minLength; i++) {
+			if (x[i] !== y[i]) {
+				// Both description and term are
+				// inside dls, so consider them equivalent here.
+				var diffs =  [x[i], y[i]].sort();
+				if (diffs[0] !== 'description' &&
+						diffs[1] !== 'term' ) {
+							break;
+						}
+			}
+		}
+		return i;
+	}
+
+	function popTags( n ) {
+		for (var i = 0; i < n; i++ ) {
+			out.push(closeTags.pop());
+		}
+	}
+
+	function openLists( bs, bn, attribs ) {
+		var prefix = commonPrefixLength (bs, bn);
+		// pop close tags from stack
+		popTags(closeTags.length - prefix);
+		for(var i = prefix; i < bn.length; i++) {
+			var c = bn[i];
+			switch (c) {
+				case 'bullet':
+					out.push(es.Html.makeOpeningTag('ul', attribs));
+					closeTags.push(es.Html.makeClosingTag('ul'));
+					break;
+				case 'number':
+					out.push(es.Html.makeOpeningTag('ol', attribs));
+					closeTags.push(es.Html.makeClosingTag('ol'));
+					break;
+				case 'term':
+				case 'description':
+					out.push(es.Html.makeOpeningTag('dl', attribs));
+					closeTags.push(es.Html.makeClosingTag('dl'));
+					break;
+				default:
+					throw("Unknown node prefix " + c);
+			}
+		}
+	}
+
+	for (var i = 0, length = node.children.length; i < length; i++) {
+		var e = node.children[i];
+		bnext = e.attributes.styles;
+		delete e.attributes.styles;
+		openLists( bstack, bnext, e.attributes );
+		var tag;
+		switch(bnext[bnext.length - 1]) {
+			case 'term':
+				tag = 'dt'; break;
+			case 'description':
+				tag = 'dd'; break;
+			default:
+				tag = 'li'; break;
+		}
+		out.push( es.Html.makeTag(tag, e.attributes, this.document( e ) ) );
+		bstack = bnext;
+	}
+	popTags(closeTags.length);
+	return out.join("\n");
+};
+
+es.HtmlSerializer.prototype.table = function( node ) {
+	var lines = [],
+		attributes = es.HtmlSerializer.getHtmlAttributes( node.attributes );
+	lines.push( es.Html.makeOpeningTag( 'table', attributes ) );
+	for ( var i = 0, length = node.children.length; i < length; i++ ) {
+		var child = node.children[i];
+		lines.push( this[child.type]( child ) );
+	}
+	lines.push( es.Html.makeClosingTag( 'table' ) );
+	return lines.join( '\n' );
+};
+
+es.HtmlSerializer.prototype.tableRow = function( node ) {
+	var lines = [],
+		attributes = es.HtmlSerializer.getHtmlAttributes( node.attributes );
+	lines.push( es.Html.makeOpeningTag( 'tr', attributes ) );
+	for ( var i = 0, length = node.children.length; i < length; i++ ) {
+		lines.push( this.tableCell( node.children[i] ) );
+	}
+	lines.push( es.Html.makeClosingTag( 'tr' ) );
+	return lines.join( '\n' );
+};
+
+es.HtmlSerializer.prototype.tableCell = function( node ) {
+	var symbolTable = {
+			'tableHeading': 'th',
+			'tableCell': 'td'
+		},
+		attributes = es.HtmlSerializer.getHtmlAttributes( node.attributes );
+	return es.Html.makeTag( symbolTable[node.type], attributes, this.document( node, true ) );
+};
+
+es.HtmlSerializer.prototype.tableCaption = function( node ) {
+	attributes = es.HtmlSerializer.getHtmlAttributes( node.attributes );
+	return es.Html.makeTag( 'caption', attributes, this.content( node.content ) );
+};
+
+es.HtmlSerializer.prototype.transclusion = function( node ) {
+	var title = [];
+	if ( node.namespace !== 'Main' ) {
+		title.push( node.namespace );
+	}
+	title.push( node.title );
+	title = title.join( ':' );
+	return es.Html.makeTag( 'a', { 'href': '/wiki/' + title }, title );
+};
+
+es.HtmlSerializer.prototype.parameter = function( node ) {
+	return '{{{' + node.name + '}}}';
+};
+
+es.HtmlSerializer.prototype.content = function( node ) {
+	if ( 'annotations' in node && node.annotations.length ) {
+		var annotationSerializer = new es.AnnotationSerializer(),
+			tagTable = {
+				'textStyle/bold': 'b',
+				'textStyle/italic': 'i',
+				'textStyle/strong': 'strong',
+				'textStyle/emphasize': 'em',
+				'textStyle/big': 'big',
+				'textStyle/small': 'small',
+				'textStyle/superScript': 'sup',
+				'textStyle/subScript': 'sub'
+			};
+		for ( var i = 0, length = node.annotations.length; i < length; i++ ) {
+			var annotation = node.annotations[i];
+			if ( annotation.type in tagTable ) {
+				annotationSerializer.addTags( annotation.range, tagTable[annotation.type] );
+			} else {
+				switch ( annotation.type ) {
+					case 'link/external':
+						annotationSerializer.addTags(
+							annotation.range, 'a', { 'href': annotation.data.url }
+						);
+						break;
+					case 'link/internal':
+						annotationSerializer.addTags(
+							annotation.range, 'a', { 'href': '/wiki/' + annotation.data.title }
+						);
+						break;
+					case 'object/template':
+					case 'object/hook':
+						annotationSerializer.add( annotation.range, annotation.data.html, '' );
+						break;
+				}
+			}
+		}
+		return annotationSerializer.render( node.text );
+	} else {
+		return node.text;
+	}
+};
+/**
+ * Serializes a WikiDom plain object into a JSON string.
+ * 
+ * @class
+ * @constructor
+ * @param {Object} options List of options for serialization
+ * @param {String} options.indentWith Text to use as indentation, such as \t or 4 spaces
+ * @param {String} options.joinWith Text to use as line joiner, such as \n or '' (empty string)
+ */
+es.JsonSerializer = function( options ) {
+	this.options = $.extend( {
+		'indentWith': '\t',
+		'joinWith': '\n'
+	}, options || {} );
+};
+
+/* Static Methods */
+
+/**
+ * Get a serialized version of data.
+ * 
+ * @static
+ * @method
+ * @param {Object} data Data to serialize
+ * @param {Object} options Options to use, @see {es.JsonSerializer} for details
+ * @returns {String} Serialized version of data
+ */
+es.JsonSerializer.stringify = function( data, options ) {
+	return ( new es.JsonSerializer( options ) ).stringify( data );
+};
+
+/**
+ * Gets the type of a given value.
+ * 
+ * @static
+ * @method
+ * @param {Mixed} value Value to get type of
+ * @returns {String} Symbolic name of type
+ */
+es.JsonSerializer.typeOf = function( value ) {
+	if ( typeof value === 'object' ) {
+		if ( value === null ) {
+			return 'null';
+		}
+		switch ( value.constructor ) {
+			case [].constructor:
+				return 'array';
+			case ( new Date() ).constructor:
+				return 'date';
+			case ( new RegExp() ).constructor:
+				return 'regex';
+			default:
+				return 'object';
+		}
+	}
+	return typeof value;
+};
+
+/* Methods */
+
+/**
+ * Get a serialized version of data.
+ * 
+ * @method
+ * @param {Object} data Data to serialize
+ * @param {String} indentation String to prepend each line with (used internally with recursion)
+ * @returns {String} Serialized version of data
+ */
+es.JsonSerializer.prototype.stringify = function( data, indention ) {
+	if ( indention === undefined ) {
+		indention = '';
+	}
+	var type = es.JsonSerializer.typeOf( data ),
+		key;
+	
+	// Open object/array
+	var json = '';
+	if ( type === 'array' ) {
+		if (data.length === 0) {
+			// Empty array
+			return '[]';
+		}
+		json += '[';
+	} else {
+		var empty = true;
+		for ( key in data ) {
+			if ( data.hasOwnProperty( key ) ) {
+				empty = false;
+				break;
+			}
+		}
+		if ( empty ) {
+			return '{}';
+		}
+		json += '{';
+	}
+	
+	// Iterate over items
+	var comma = false;
+	for ( key in data ) {
+		if ( data.hasOwnProperty( key ) ) {
+			json += ( comma ? ',' : '' ) + this.options.joinWith + indention +
+				this.options.indentWith + ( type === 'array' ? '' : '"' + key + '"' + ': ' );
+			switch ( es.JsonSerializer.typeOf( data[key] ) ) {
+				case 'array':
+				case 'object':
+					json += this.stringify( data[key], indention + this.options.indentWith );
+					break;
+				case 'boolean':
+				case 'number':
+					json += data[key].toString();
+					break;
+				case 'null':
+					json += 'null';
+					break;
+				case 'string':
+					json += '"' + data[key].replace(/[\n]/g, '\\n').replace(/[\t]/g, '\\t') + '"';
+					break;
+				// Skip other types
+			}
+			comma = true;
+		}
+	}
+	
+	// Close object/array
+	json += this.options.joinWith + indention + ( type === 'array' ? ']' : '}' );
+	
+	return json;
+};
+/**
+ * Serializes a WikiDom plain object into a Wikitext string.
+ * 
+ * @class
+ * @constructor
+ * @param options {Object} List of options for serialization
+ */
+es.WikitextSerializer = function( options ) {
+	this.options = $.extend( {
+		// defaults
+	}, options || {} );
+};
+
+/* Static Methods */
+
+/**
+ * Get a serialized version of data.
+ * 
+ * @static
+ * @method
+ * @param {Object} data Data to serialize
+ * @param {Object} options Options to use, @see {es.WikitextSerializer} for details
+ * @returns {String} Serialized version of data
+ */
+es.WikitextSerializer.stringify = function( data, options ) {
+	return ( new es.WikitextSerializer( options ) ).document( data );
+};
+
+es.WikitextSerializer.getHtmlAttributes = function( attributes ) {
+	var htmlAttributes = {},
+		count = 0;
+	for ( var key in attributes ) {
+		if ( key.indexOf( 'html/' ) === 0 ) {
+			htmlAttributes[key.substr( 5 )] = attributes[key];
+			count++;
+		}
+	}
+	return count ? htmlAttributes : null;
+};
+
+/* Methods */
+
+es.WikitextSerializer.prototype.document = function( node, rawFirstParagraph ) {
+	var lines = [];
+	for ( var i = 0, length = node.children.length; i < length; i++ ) {
+		var childNode = node.children[i];
+		if ( childNode.type in this ) {
+			// Special case for paragraphs which have particular spacing needs
+			if ( childNode.type === 'paragraph' ) {
+				lines.push( this.paragraph( childNode, rawFirstParagraph && i === 0 ) );
+				if ( i + 1 < length /* && node.children[i + 1].type === 'paragraph' */ ) {
+					lines.push( '' );
+				}
+			} else {
+				lines.push( this[childNode.type].call( this, childNode ) );
+			}
+		}
+	}
+	return lines.join( '\n' );
+};
+
+es.WikitextSerializer.prototype.comment = function( node ) {
+	return '<!--' + node.text + '-->';
+};
+
+es.WikitextSerializer.prototype.horizontalRule = function( node ) {
+	return '----';
+};
+
+es.WikitextSerializer.prototype.heading = function( node ) {
+	var symbols = es.repeatString( '=', node.attributes.level );
+	return symbols + this.content( node.content ) + symbols;
+};
+
+es.WikitextSerializer.prototype.paragraph = function( node ) {
+	return this.content( node.content );
+};
+
+es.WikitextSerializer.prototype.pre = function( node ) {
+	return ' ' + this.content( node.content ).replace( '\n', '\n ' );
+};
+
+es.WikitextSerializer.prototype.list = function( node ) {
+	var symbolTable = {
+		'bullet': '*',
+		'number': '#',
+		'term': ';',
+		'description': ':'
+	};
+	function convertStyles( styles ) {
+		var symbols = '';
+		for ( var i = 0, length = styles.length; i < length; i++ ) {
+			symbols += styles[i] in symbolTable ? symbolTable[styles[i]] : '';
+		}
+		return symbols;
+	}
+	var lines = [];
+	for ( var i = 0, length = node.children.length; i < length; i++ ) {
+		var childNode = node.children[i];
+		lines.push(
+			convertStyles( childNode.attributes.styles ) + ' ' +
+				this.document( childNode )
+		);
+	}
+	return lines.join( '\n' ) + '\n';
+};
+
+es.WikitextSerializer.prototype.table = function( node ) {
+	var lines = [],
+		attributes = es.WikitextSerializer.getHtmlAttributes( node.attributes );
+	if ( attributes ) {
+		attributes = es.Html.makeAttributeList( attributes );
+	}
+	lines.push( '{|' + attributes );
+	for ( var i = 0, length = node.children.length; i < length; i++ ) {
+		lines.push( this.tableRow( node.children[i], i === 0 ) );
+	}
+	lines.push( '|}' );
+	return lines.join( '\n' );
+};
+
+es.WikitextSerializer.prototype.tableRow = function( node, first ) {
+	var lines = [],
+		attributes = es.WikitextSerializer.getHtmlAttributes( node.attributes );
+	if ( attributes ) {
+		attributes = es.Html.makeAttributeList( attributes );
+	}
+	if ( !first || attributes ) {
+		lines.push( '|-' + attributes );
+	}
+	for ( var i = 0, length = node.children.length; i < length; i++ ) {
+		lines.push( this.tableCell( node.children[i] ) );
+	}
+	return lines.join( '\n' );
+};
+
+es.WikitextSerializer.prototype.tableCell = function( node ) {
+	var symbolTable = {
+		'tableHeading': '!',
+		'tableCell': '|'
+	};
+	var attributes = es.WikitextSerializer.getHtmlAttributes( node.attributes );
+	if ( attributes ) {
+		attributes = es.Html.makeAttributeList( attributes ) + '|';
+	}
+	return symbolTable[node.type] + attributes + this.document( node, true );
+};
+
+es.WikitextSerializer.prototype.transclusion = function( node ) {
+	var title = [];
+	if ( node.namespace === 'Main' ) {
+		title.push( '' );
+	} else if ( node.namespace !== 'Template' ) {
+		title.push( node.namespace );
+	}
+	title.push( node.title );
+	return '{{' + title.join( ':' ) + '}}';
+};
+
+es.WikitextSerializer.prototype.parameter = function( node ) {
+	return '{{{' + node.name + '}}}';
+};
+
+es.WikitextSerializer.prototype.content = function( node ) {
+	if ( 'annotations' in node && node.annotations.length ) {
+		var annotationSerializer = new es.AnnotationSerializer(),
+			tagTable = {
+				'textStyle/strong': 'strong',
+				'textStyle/emphasize': 'em',
+				'textStyle/big': 'big',
+				'textStyle/small': 'small',
+				'textStyle/superScript': 'sup',
+				'textStyle/subScript': 'sub'
+			},
+			markupTable = {
+				'textStyle/bold': "'''",
+				'textStyle/italic': "''"
+			};
+		for ( var i = 0, length = node.annotations.length; i < length; i++ ) {
+			var annotation = node.annotations[i];
+			if ( annotation.type in tagTable ) {
+				annotationSerializer.addTags( annotation.range, tagTable[annotation.type] );
+			} else if ( annotation.type in markupTable ) {
+				annotationSerializer.add(
+					annotation.range, markupTable[annotation.type], markupTable[annotation.type]
+				);
+			} else {
+				switch ( annotation.type ) {
+					case 'link/external':
+						annotationSerializer.add(
+							annotation.range, '[' + annotation.data.href + ' ', ']'
+						);
+						break;
+					case 'link/internal':
+						annotationSerializer.add(
+							annotation.range, '[[' + annotation.data.title + '|', ']]'
+						);
+						break;
+				}
+			}
+		}
+		return annotationSerializer.render( node.text );
+	} else {
+		return node.text;
+	}
 };
 /**
  * Event emitter.
@@ -1509,321 +1893,113 @@ es.EventEmitter.prototype.listeners = function( type ) {
 	return type in this.events ? this.events[type] : [];
 };
 /**
- * Creates an es.DocumentModelLeafNode object.
+ * Creates an es.DocumentNode object.
  * 
  * @class
  * @abstract
  * @constructor
- * @extends {es.DocumentLeafNode}
- * @extends {es.DocumentModelNode}
- * @param {String} type Symbolic name of node type
- * @param {Object} element Element object in document data
- * @param {Integer} [length] Length of content data in document
+ * @extends {es.EventEmitter}
  */
-es.DocumentModelLeafNode = function( type, element, length ) {
+es.DocumentNode = function() {
 	// Inheritance
-	es.DocumentLeafNode.call( this );
-	es.DocumentModelNode.call( this, type, element, length );
+	es.EventEmitter.call( this );
 
-	// Properties
-	this.contentLength = length || 0;
+	// Reusable function for passing update events upstream
+	var _this = this;
+	this.emitUpdate = function() {
+		_this.emit( 'update' );
+	};
 };
 
 /* Methods */
 
 /**
- * Gets a plain object representation of the document's data.
+ * Gets the content length.
  * 
  * @method
- * @see {es.DocumentModelNode.getPlainObject}
- * @see {es.DocumentModel.newFromPlainObject}
- * @returns {Object} Plain object representation, 
- */
-es.DocumentModelLeafNode.prototype.getPlainObject = function() {
-	var obj = { 'type': this.type };
-	if ( this.element && this.element.attributes ) {
-		obj.attributes = es.copyObject( this.element.attributes );
-	}
-	obj.content = es.DocumentModel.getExpandedContentData( this.getContentData() );
-	return obj;
-};
-
-/* Inheritance */
-
-es.extendClass( es.DocumentModelLeafNode, es.DocumentLeafNode );
-es.extendClass( es.DocumentModelLeafNode, es.DocumentModelNode );
-/**
- * Creates an es.DocumentViewBranchNode object.
- * 
- * @class
  * @abstract
- * @constructor
- * @extends {es.DocumentBranchNode}
- * @extends {es.DocumentViewNode}
- * @param model {es.ModelNode} Model to observe
- * @param {jQuery} [$element] Element to use as a container
+ * @returns {Integer} Length of content
  */
-es.DocumentViewBranchNode = function( model, $element, horizontal ) {
-	// Inheritance
-	es.DocumentBranchNode.call( this );
-	es.DocumentViewNode.call( this, model, $element );
-
-	// Properties
-	this.horizontal = horizontal || false;
-
-	if ( model ) {
-		// Append existing model children
-		var childModels = model.getChildren();
-		for ( var i = 0; i < childModels.length; i++ ) {
-			this.onAfterPush( childModels[i] );
-		}
-
-		// Observe and mimic changes on model
-		this.model.addListenerMethods( this, {
-			'afterPush': 'onAfterPush',
-			'afterUnshift': 'onAfterUnshift',
-			'afterPop': 'onAfterPop',
-			'afterShift': 'onAfterShift',
-			'afterSplice': 'onAfterSplice',
-			'afterSort': 'onAfterSort',
-			'afterReverse': 'onAfterReverse'
-		} );
-	}
-};
-
-/* Methods */
-
-es.DocumentViewBranchNode.prototype.onAfterPush = function( childModel ) {
-	var childView = childModel.createView();
-	this.emit( 'beforePush', childView );
-	childView.attach( this );
-	childView.on( 'update', this.emitUpdate );
-	// Update children
-	this.children.push( childView );
-	// Update DOM
-	this.$.append( childView.$ );
-	// TODO: adding and deleting classes has to be implemented for unshift, shift, splice, sort
-	// and reverse as well
-	if ( this.children.length === 1 ) {
-		childView.$.addClass('es-viewBranchNode-firstChild');
-	}
-	this.emit( 'afterPush', childView );
-	this.emit( 'update' );
-};
-
-es.DocumentViewBranchNode.prototype.onAfterUnshift = function( childModel ) {
-	var childView = childModel.createView();
-	this.emit( 'beforeUnshift', childView );
-	childView.attach( this );
-	childView.on( 'update', this.emitUpdate );
-	// Update children
-	this.children.unshift( childView );
-	// Update DOM
-	this.$.prepend( childView.$ );
-	this.emit( 'afterUnshift', childView );
-	this.emit( 'update' );
-};
-
-es.DocumentViewBranchNode.prototype.onAfterPop = function() {
-	this.emit( 'beforePop' );
-	// Update children
-	var childView = this.children.pop();
-	childView.detach();
-	childView.removeEventListener( 'update', this.emitUpdate );
-	// Update DOM
-	childView.$.detach();
-	this.emit( 'afterPop' );
-	this.emit( 'update' );
-};
-
-es.DocumentViewBranchNode.prototype.onAfterShift = function() {
-	this.emit( 'beforeShift' );
-	// Update children
-	var childView = this.children.shift();
-	childView.detach();
-	childView.removeEventListener( 'update', this.emitUpdate );
-	// Update DOM
-	childView.$.detach();
-	this.emit( 'afterShift' );
-	this.emit( 'update' );
-};
-
-es.DocumentViewBranchNode.prototype.onAfterSplice = function( index, howmany ) {
-	var i,
-		length,
-		args = Array.prototype.slice.call( arguments, 0 );
-	// Convert models to views and attach them to this node
-	if ( args.length >= 3 ) {
-		for ( i = 2, length = args.length; i < length; i++ ) {
-			args[i] = args[i].createView();
-		}
-	}
-	this.emit.apply( this, ['beforeSplice'].concat( args ) );
-	var removals = this.children.splice.apply( this.children, args );
-	for ( i = 0, length = removals.length; i < length; i++ ) {
-		removals[i].detach();
-		removals[i].removeListener( 'update', this.emitUpdate );
-		// Update DOM
-		removals[i].$.detach();
-	}
-	if ( args.length >= 3 ) {
-		var $target;
-		if ( index ) {
-			// Get the element before the insertion point
-			$anchor = this.$.children().eq( index - 1 );
-		}
-		for ( i = args.length - 1; i >= 2; i-- ) {
-			args[i].attach( this );
-			args[i].on( 'update', this.emitUpdate );
-			if ( index ) {
-				$anchor.after( args[i].$ );
-			} else {
-				this.$.prepend( args[i].$ );
-			}
-		}
-	}
-	this.emit.apply( this, ['afterSplice'].concat( args ) );
-	if ( args.length >= 3 ) {
-		for ( i = 2, length = args.length; i < length; i++ ) {
-			args[i].renderContent();
-		}
-	}
-	this.emit( 'update' );
-};
-
-es.DocumentViewBranchNode.prototype.onAfterSort = function() {
-	this.emit( 'beforeSort' );
-	var childModels = this.model.getChildren();
-	for ( var i = 0; i < childModels.length; i++ ) {
-		for ( var j = 0; j < this.children.length; j++ ) {
-			if ( this.children[j].getModel() === childModels[i] ) {
-				var childView = this.children[j];
-				// Update children
-				this.children.splice( j, 1 );
-				this.children.push( childView );
-				// Update DOM
-				this.$.append( childView.$ );
-			}
-		}
-	}
-	this.emit( 'afterSort' );
-	this.emit( 'update' );
-	this.renderContent();
-};
-
-es.DocumentViewBranchNode.prototype.onAfterReverse = function() {
-	this.emit( 'beforeReverse' );
-	// Update children
-	this.reverse();
-	// Update DOM
-	this.$.children().each( function() {
-		$(this).prependTo( $(this).parent() );
-	} );
-	this.emit( 'afterReverse' );
-	this.emit( 'update' );
-	this.renderContent();
+es.DocumentNode.prototype.getContentLength = function() {
+	throw 'DocumentNode.getContentLength not implemented in this subclass:' + this.constructor;
 };
 
 /**
- * Render content.
+ * Gets the element length.
  * 
  * @method
+ * @abstract
+ * @returns {Integer} Length of content
  */
-es.DocumentViewBranchNode.prototype.renderContent = function() {
-	for ( var i = 0; i < this.children.length; i++ ) {
-		this.children[i].renderContent();
-	}
+es.DocumentNode.prototype.getElementLength = function() {
+	throw 'DocumentNode.getElementLength not implemented in this subclass:' + this.constructor;
 };
 
 /**
- * Draw selection around a given range.
+ * Checks if this node has child nodes.
  * 
  * @method
- * @param {es.Range} range Range of content to draw selection around
+ * @abstract
+ * @returns {Boolean} Whether this node has children
  */
-es.DocumentViewBranchNode.prototype.drawSelection = function( range ) {
-	var selectedNodes = this.selectNodes( range, true );
-	for ( var i = 0; i < this.children.length; i++ ) {
-		if ( selectedNodes.length && this.children[i] === selectedNodes[0].node ) {
-			for ( var j = 0; j < selectedNodes.length; j++ ) {
-				selectedNodes[j].node.drawSelection( selectedNodes[j].range );
-			}
-			i += selectedNodes.length - 1;
-		} else {
-			this.children[i].clearSelection();
-		}
-	}
+es.DocumentNode.prototype.hasChildren = function() {
+	throw 'DocumentNode.hasChildren not implemented in this subclass:' + this.constructor;
 };
 
 /**
- * Clear selection.
+ * Traverse tree of nodes (model or view) upstream and for each traversed node call callback function passing traversed node as a parameter.
+ * Callback function is called for node passed as node paramter as well.
  * 
+ * @param {es.DocumentNode} node Node from which to start traversing
+ * @param {function} callback Callback method to be called for every traversed node
  * @method
  */
-es.DocumentViewBranchNode.prototype.clearSelection = function() {
-	for ( var i = 0; i < this.children.length; i++ ) {
-		this.children[i].clearSelection();
-	}
-};
-
-/**
- * Gets the nearest offset of a rendered position.
- * 
- * @method
- * @param {es.Position} position Position to get offset for
- * @returns {Integer} Offset of position
- */
-es.DocumentViewBranchNode.prototype.getOffsetFromRenderedPosition = function( position ) {
-	if ( this.children.length === 0 ) {
-		return 0;
-	}
-	var node = this.children[0];
-	for ( var i = 1; i < this.children.length; i++ ) {
-		if ( this.horizontal && this.children[i].$.offset().left > position.left ) {
+es.DocumentNode.traverseUpstream = function( node, callback ) {
+	while ( node ) {
+		if ( callback ( node ) === false ) {
 			break;
-		} else if ( !this.horizontal && this.children[i].$.offset().top > position.top ) {
-			break;			
 		}
-		node = this.children[i];
+		node = node.getParent();
 	}
-	return node.getParent().getOffsetFromNode( node, true ) +
-		node.getOffsetFromRenderedPosition( position ) + 1;
 };
 
 /**
- * Gets rendered position of offset within content.
- * 
- * @method
- * @param {Integer} offset Offset to get position for
- * @returns {es.Position} Position of offset
+ * Find the common ancestor of two equal-depth nodes, and return the
+ * path from each node to the common ancestor.
+ * @param {es.DocumentNode} node1
+ * @param {es.DocumentNode} node2
+ * @returns {Object|Boolean} Object with keys 'commonAncestor', 'node1Path' and 'node2Path',
+ *  or false if there is no common ancestor or if the nodes have unequal depth
  */
-es.DocumentViewBranchNode.prototype.getRenderedPositionFromOffset = function( offset, leftBias ) {
-	var node = this.getNodeFromOffset( offset, true );
-	if ( node !== null ) {
-		return node.getRenderedPositionFromOffset(
-			offset - this.getOffsetFromNode( node, true ) - 1,
-			leftBias
-		);
+es.DocumentNode.getCommonAncestorPaths = function( node1, node2 ) {
+	var	path1 = [],
+		path2 = [],
+		n1 = node1,
+		n2 = node2;
+	
+	// Move up from n1 and n2 simultaneously until we find the
+	// common ancestor
+	while ( n1 !== n2 ) {
+		// Add these nodes to their respective paths
+		path1.push( n1 );
+		path2.push( n2 );
+		// Move up
+		n1 = n1.getParent();
+		n2 = n2.getParent();
+		if ( n1 === null || n2 === null ) {
+			// Reached a root, so no common ancestor or unequal depth
+			return false;
+		}
 	}
-	return null;
-};
-
-es.DocumentViewBranchNode.prototype.getRenderedLineRangeFromOffset = function( offset ) {
-	var node = this.getNodeFromOffset( offset, true );
-	if ( node !== null ) {
-		var nodeOffset = this.getOffsetFromNode( node, true );
-		return es.Range.newFromTranslatedRange(
-			node.getRenderedLineRangeFromOffset( offset - nodeOffset - 1 ),
-			nodeOffset + 1
-		);
-	}
-	return null;
+	
+	// If we got here, we've found the common ancestor, and because we did
+	// simultaneous traversal we also know node1 and node2 have the same depth.
+	return { 'commonAncestor': n1, 'node1Path': path1, 'node2Path': path2 };
 };
 
 /* Inheritance */
 
-es.extendClass( es.DocumentViewBranchNode, es.DocumentBranchNode );
-es.extendClass( es.DocumentViewBranchNode, es.DocumentViewNode );
+es.extendClass( es.DocumentNode, es.EventEmitter );
 /**
  * Creates an es.DocumentModelNode object.
  * 
@@ -2112,110 +2288,6 @@ es.DocumentModelNode.prototype.getContentText = function( range ) {
 /* Inheritance */
 
 es.extendClass( es.DocumentModelNode, es.DocumentNode );
-/**
- * Creates an es.DocumentViewNode object.
- * 
- * @class
- * @abstract
- * @constructor
- * @extends {es.DocumentNode}
- * @param {es.DocumentModelNode} model Model to observe
- * @param {jQuery} [$element=$( '<div></div>' )] Element to use as a container
- */
-es.DocumentViewNode = function( model, $element ) {
-	// Inheritance
-	es.DocumentNode.call( this );
-	
-	// Properties
-	this.model = model;
-	this.parent = null;
-	this.$ = $element || $( '<div/>' );
-};
-
-/* Methods */
-
-/**
- * Gets the length of the element in the model.
- * 
- * @method
- * @see {es.DocumentNode.prototype.getElementLength}
- * @returns {Integer} Length of content
- */
-es.DocumentViewNode.prototype.getElementLength = function() {
-	return this.model.getElementLength();
-};
-
-/**
- * Gets the length of the content in the model.
- * 
- * @method
- * @see {es.DocumentNode.prototype.getContentLength}
- * @returns {Integer} Length of content
- */
-es.DocumentViewNode.prototype.getContentLength = function() {
-	return this.model.getContentLength();
-};
-
-/**
- * Attaches node as a child to another node.
- * 
- * @method
- * @param {es.DocumentViewNode} parent Node to attach to
- * @emits attach (parent)
- */
-es.DocumentViewNode.prototype.attach = function( parent ) {
-	this.parent = parent;
-	this.emit( 'attach', parent );
-};
-
-/**
- * Detaches node from it's parent.
- * 
- * @method
- * @emits detach (parent)
- */
-es.DocumentViewNode.prototype.detach = function() {
-	var parent = this.parent;
-	this.parent = null;
-	this.emit( 'detach', parent );
-};
-
-/**
- * Gets a reference to this node's parent.
- * 
- * @method
- * @returns {es.DocumentViewNode} Reference to this node's parent
- */
-es.DocumentViewNode.prototype.getParent = function() {
-	return this.parent;
-};
-
-/**
- * Gets a reference to the model this node observes.
- * 
- * @method
- * @returns {es.DocumentModelNode} Reference to the model this node observes
- */
-es.DocumentViewNode.prototype.getModel = function() {
-	return this.model;
-};
-
-es.DocumentViewNode.getSplitableNode = function( node ) {
-	var splitableNode = null;
-
-	es.DocumentNode.traverseUpstream( node, function( node ) {
-		var elementType = node.model.getElementType();
-		if ( splitableNode != null && es.DocumentView.splitRules[ elementType ].children === true ) {
-			return false;
-		}
-		splitableNode = es.DocumentView.splitRules[ elementType ].self ? node : null
-	} );
-	return splitableNode;
-};
-
-/* Inheritance */
-
-es.extendClass( es.DocumentViewNode, es.DocumentNode );
 /**
  * Creates an es.DocumentBranchNode object.
  * 
@@ -2639,85 +2711,682 @@ es.DocumentBranchNode.prototype.selectNodes = function( range, shallow, offset )
 	return nodes;
 };
 /**
- * Creates an es.Inspector object.
+ * Creates an es.DocumentLeafNode object.
  * 
  * @class
+ * @abstract
  * @constructor
- * @param {es.ToolbarView} toolbar
- * @param {String} name
  */
-es.Inspector = function( toolbar, context ) {
-	// Inheritance
-	es.EventEmitter.call( this );
-	if ( !toolbar || !context ) {
-		return;
-	}
-
-	// Properties
-	this.toolbar = toolbar;
-	this.context = context;
-	this.$ = $( '<div class="es-inspector"></div>' );
-	this.$closeButton = $( '<div class="es-inspector-button es-inspector-closeButton"></div>' )
-		.appendTo( this.$ );
-	this.$acceptButton = $( '<div class="es-inspector-button es-inspector-acceptButton"></div>' )
-		.appendTo( this.$ );
-	this.$form = $( '<form></form>' ).appendTo( this.$ );
-
-	// Events
-	var _this = this;
-	this.$closeButton.click( function() {
-		_this.context.closeInspector( false );
-	} );
-	this.$acceptButton.click( function() {
-		if ( !$(this).is( '.es-inspector-button-disabled' ) ) {
-			_this.context.closeInspector( true );
-		}
-	} );
-	this.$form.submit( function( e ) {
-		_this.context.closeInspector( true );
-		e.preventDefault();
-		return false;
-	} );
-	this.$form.keydown( function( e ) {
-		// Escape
-		if ( e.which === 27 ) {
-			_this.context.closeInspector( false );
-			e.preventDefault();
-			return false;
-		}
-	} );
+es.DocumentLeafNode = function() {
+	//
 };
 
 /* Methods */
 
-es.Inspector.prototype.open = function() {
-	this.$.show();
-	this.context.closeMenu();
-	if ( this.onOpen ) {
-		this.onOpen();
+/**
+ * Checks if this node has child nodes.
+ * 
+ * @method
+ * @see {es.DocumentNode.prototype.hasChildren}
+ * @returns {Boolean} Whether this node has children
+ */
+es.DocumentLeafNode.prototype.hasChildren = function() {
+	return false;
+};
+/**
+ * Creates an es.DocumentModelBranchNode object.
+ * 
+ * @class
+ * @abstract
+ * @constructor
+ * @extends {es.DocumentBranchNode}
+ * @extends {es.DocumentModelNode}
+ * @param {String} type Symbolic name of node type
+ * @param {Object} element Element object in document data
+ * @param {es.DocumentModelBranchNode[]} [contents] List of child nodes to append
+ */
+es.DocumentModelBranchNode = function( type, element, contents ) {
+	// Inheritance
+	es.DocumentBranchNode.call( this );
+	es.DocumentModelNode.call( this, type, element, 0 );
+
+	// Child nodes
+	if ( es.isArray( contents ) ) {
+		for ( var i = 0; i < contents.length; i++ ) {
+			this.push( contents[i] );
+		}
 	}
-	this.emit( 'open' );
 };
 
-es.Inspector.prototype.close = function( accept ) {
-	this.$.hide();
-	if ( this.onClose ) {
-		this.onClose( accept );
+/* Methods */
+
+/**
+ * Gets a plain object representation of the document's data.
+ * 
+ * @method
+ * @see {es.DocumentModelNode.getPlainObject}
+ * @see {es.DocumentModel.newFromPlainObject}
+ * @returns {Object} Plain object representation
+ */
+es.DocumentModelBranchNode.prototype.getPlainObject = function() {
+	var obj = { 'type': this.type };
+	if ( this.element && this.element.attributes ) {
+		obj.attributes = es.copyObject( this.element.attributes );
 	}
-	this.emit( 'close' );
-	try
-	{
-	    surfaceView.$input.focus();
-    }
-    catch (e)
-    {
-        console.error(e);
-    }
+	obj.children = [];
+	for ( var i = 0; i < this.children.length; i++ ) {
+		obj.children.push( this.children[i].getPlainObject() );
+	}
+	return obj;
+};
+
+/**
+ * Adds a node to the end of this node's children.
+ * 
+ * @method
+ * @param {es.DocumentModelBranchNode} childModel Item to add
+ * @returns {Integer} New number of children
+ * @emits beforePush (childModel)
+ * @emits afterPush (childModel)
+ * @emits update
+ */
+es.DocumentModelBranchNode.prototype.push = function( childModel ) {
+	this.emit( 'beforePush', childModel );
+	childModel.attach( this );
+	childModel.on( 'update', this.emitUpdate );
+	this.children.push( childModel );
+	this.adjustContentLength( childModel.getElementLength(), true );
+	this.emit( 'afterPush', childModel );
+	this.emit( 'update' );
+	return this.children.length;
+};
+
+/**
+ * Adds a node to the beginning of this node's children.
+ * 
+ * @method
+ * @param {es.DocumentModelBranchNode} childModel Item to add
+ * @returns {Integer} New number of children
+ * @emits beforeUnshift (childModel)
+ * @emits afterUnshift (childModel)
+ * @emits update
+ */
+es.DocumentModelBranchNode.prototype.unshift = function( childModel ) {
+	this.emit( 'beforeUnshift', childModel );
+	childModel.attach( this );
+	childModel.on( 'update', this.emitUpdate );
+	this.children.unshift( childModel );
+	this.adjustContentLength( childModel.getElementLength(), true );
+	this.emit( 'afterUnshift', childModel );
+	this.emit( 'update' );
+	return this.children.length;
+};
+
+/**
+ * Removes a node from the end of this node's children
+ * 
+ * @method
+ * @returns {es.DocumentModelBranchNode} Removed childModel
+ * @emits beforePop
+ * @emits afterPop
+ * @emits update
+ */
+es.DocumentModelBranchNode.prototype.pop = function() {
+	if ( this.children.length ) {
+		this.emit( 'beforePop' );
+		var childModel = this.children[this.children.length - 1];
+		childModel.detach();
+		childModel.removeListener( 'update', this.emitUpdate );
+		this.children.pop();
+		this.adjustContentLength( -childModel.getElementLength(), true );
+		this.emit( 'afterPop' );
+		this.emit( 'update' );
+		return childModel;
+	}
+};
+
+/**
+ * Removes a node from the beginning of this node's children
+ * 
+ * @method
+ * @returns {es.DocumentModelBranchNode} Removed childModel
+ * @emits beforeShift
+ * @emits afterShift
+ * @emits update
+ */
+es.DocumentModelBranchNode.prototype.shift = function() {
+	if ( this.children.length ) {
+		this.emit( 'beforeShift' );
+		var childModel = this.children[0];
+		childModel.detach();
+		childModel.removeListener( 'update', this.emitUpdate );
+		this.children.shift();
+		this.adjustContentLength( -childModel.getElementLength(), true );
+		this.emit( 'afterShift' );
+		this.emit( 'update' );
+		return childModel;
+	}
+};
+
+/**
+ * Adds and removes nodes from this node's children.
+ * 
+ * @method
+ * @param {Integer} index Index to remove and or insert nodes at
+ * @param {Integer} howmany Number of nodes to remove
+ * @param {es.DocumentModelBranchNode} [...] Variadic list of nodes to insert
+ * @returns {es.DocumentModelBranchNode[]} Removed nodes
+ * @emits beforeSplice (index, howmany, [...])
+ * @emits afterSplice (index, howmany, [...])
+ * @emits update
+ */
+es.DocumentModelBranchNode.prototype.splice = function( index, howmany ) {
+	var i,
+		length,
+		args = Array.prototype.slice.call( arguments, 0 ),
+		diff = 0;
+	this.emit.apply( this, ['beforeSplice'].concat( args ) );
+	if ( args.length >= 3 ) {
+		for ( i = 2, length = args.length; i < length; i++ ) {
+			args[i].attach( this );
+			args[i].on( 'update', this.emitUpdate );
+			diff += args[i].getElementLength();
+		}
+	}
+	var removals = this.children.splice.apply( this.children, args );
+	for ( i = 0, length = removals.length; i < length; i++ ) {
+		removals[i].detach();
+		removals[i].removeListener( 'update', this.emitUpdate );
+		diff -= removals[i].getElementLength();
+	}
+	this.adjustContentLength( diff, true );
+	this.emit.apply( this, ['afterSplice'].concat( args ) );
+	this.emit( 'update' );
+	return removals;
+};
+
+/**
+ * Sorts this node's children.
+ * 
+ * @method
+ * @param {Function} sortfunc Function to use when sorting
+ * @emits beforeSort (sortfunc)
+ * @emits afterSort (sortfunc)
+ * @emits update
+ */
+es.DocumentModelBranchNode.prototype.sort = function( sortfunc ) {
+	this.emit( 'beforeSort', sortfunc );
+	this.children.sort( sortfunc );
+	this.emit( 'afterSort', sortfunc );
+	this.emit( 'update' );
+};
+
+/**
+ * Reverses the order of this node's children.
+ * 
+ * @method
+ * @emits beforeReverse
+ * @emits afterReverse
+ * @emits update
+ */
+es.DocumentModelBranchNode.prototype.reverse = function() {
+	this.emit( 'beforeReverse' );
+	this.children.reverse();
+	this.emit( 'afterReverse' );
+	this.emit( 'update' );
+};
+
+/**
+ * Sets the root node to this and all of it's children.
+ * 
+ * @method
+ * @see {es.DocumentModelNode.prototype.setRoot}
+ * @param {es.DocumentModelNode} root Node to use as root
+ */
+es.DocumentModelBranchNode.prototype.setRoot = function( root ) {
+	this.root = root;
+	for ( var i = 0; i < this.children.length; i++ ) {
+		this.children[i].setRoot( root );
+	}
+};
+
+/**
+ * Clears the root node from this and all of it's children.
+ * 
+ * @method
+ * @see {es.DocumentModelNode.prototype.clearRoot}
+ */
+es.DocumentModelBranchNode.prototype.clearRoot = function() {
+	this.root = null;
+	for ( var i = 0; i < this.children.length; i++ ) {
+		this.children[i].clearRoot();
+	}
 };
 
 /* Inheritance */
 
-es.extendClass( es.Inspector, es.EventEmitter );
+es.extendClass( es.DocumentModelBranchNode, es.DocumentBranchNode );
+es.extendClass( es.DocumentModelBranchNode, es.DocumentModelNode );
+/**
+ * Creates an es.DocumentModelLeafNode object.
+ * 
+ * @class
+ * @abstract
+ * @constructor
+ * @extends {es.DocumentLeafNode}
+ * @extends {es.DocumentModelNode}
+ * @param {String} type Symbolic name of node type
+ * @param {Object} element Element object in document data
+ * @param {Integer} [length] Length of content data in document
+ */
+es.DocumentModelLeafNode = function( type, element, length ) {
+	// Inheritance
+	es.DocumentLeafNode.call( this );
+	es.DocumentModelNode.call( this, type, element, length );
+
+	// Properties
+	this.contentLength = length || 0;
+};
+
+/* Methods */
+
+/**
+ * Gets a plain object representation of the document's data.
+ * 
+ * @method
+ * @see {es.DocumentModelNode.getPlainObject}
+ * @see {es.DocumentModel.newFromPlainObject}
+ * @returns {Object} Plain object representation, 
+ */
+es.DocumentModelLeafNode.prototype.getPlainObject = function() {
+	var obj = { 'type': this.type };
+	if ( this.element && this.element.attributes ) {
+		obj.attributes = es.copyObject( this.element.attributes );
+	}
+	obj.content = es.DocumentModel.getExpandedContentData( this.getContentData() );
+	return obj;
+};
+
+/* Inheritance */
+
+es.extendClass( es.DocumentModelLeafNode, es.DocumentLeafNode );
+es.extendClass( es.DocumentModelLeafNode, es.DocumentModelNode );
+/**
+ * Creates an es.DocumentViewNode object.
+ * 
+ * @class
+ * @abstract
+ * @constructor
+ * @extends {es.DocumentNode}
+ * @param {es.DocumentModelNode} model Model to observe
+ * @param {jQuery} [$element=$( '<div></div>' )] Element to use as a container
+ */
+es.DocumentViewNode = function( model, $element ) {
+	// Inheritance
+	es.DocumentNode.call( this );
+	
+	// Properties
+	this.model = model;
+	this.parent = null;
+	this.$ = $element || $( '<div/>' );
+};
+
+/* Methods */
+
+/**
+ * Gets the length of the element in the model.
+ * 
+ * @method
+ * @see {es.DocumentNode.prototype.getElementLength}
+ * @returns {Integer} Length of content
+ */
+es.DocumentViewNode.prototype.getElementLength = function() {
+	return this.model.getElementLength();
+};
+
+/**
+ * Gets the length of the content in the model.
+ * 
+ * @method
+ * @see {es.DocumentNode.prototype.getContentLength}
+ * @returns {Integer} Length of content
+ */
+es.DocumentViewNode.prototype.getContentLength = function() {
+	return this.model.getContentLength();
+};
+
+/**
+ * Attaches node as a child to another node.
+ * 
+ * @method
+ * @param {es.DocumentViewNode} parent Node to attach to
+ * @emits attach (parent)
+ */
+es.DocumentViewNode.prototype.attach = function( parent ) {
+	this.parent = parent;
+	this.emit( 'attach', parent );
+};
+
+/**
+ * Detaches node from it's parent.
+ * 
+ * @method
+ * @emits detach (parent)
+ */
+es.DocumentViewNode.prototype.detach = function() {
+	var parent = this.parent;
+	this.parent = null;
+	this.emit( 'detach', parent );
+};
+
+/**
+ * Gets a reference to this node's parent.
+ * 
+ * @method
+ * @returns {es.DocumentViewNode} Reference to this node's parent
+ */
+es.DocumentViewNode.prototype.getParent = function() {
+	return this.parent;
+};
+
+/**
+ * Gets a reference to the model this node observes.
+ * 
+ * @method
+ * @returns {es.DocumentModelNode} Reference to the model this node observes
+ */
+es.DocumentViewNode.prototype.getModel = function() {
+	return this.model;
+};
+
+es.DocumentViewNode.getSplitableNode = function( node ) {
+	var splitableNode = null;
+
+	es.DocumentNode.traverseUpstream( node, function( node ) {
+		var elementType = node.model.getElementType();
+		if ( splitableNode != null && es.DocumentView.splitRules[ elementType ].children === true ) {
+			return false;
+		}
+		splitableNode = es.DocumentView.splitRules[ elementType ].self ? node : null
+	} );
+	return splitableNode;
+};
+
+/* Inheritance */
+
+es.extendClass( es.DocumentViewNode, es.DocumentNode );
+/**
+ * Creates an es.DocumentViewBranchNode object.
+ * 
+ * @class
+ * @abstract
+ * @constructor
+ * @extends {es.DocumentBranchNode}
+ * @extends {es.DocumentViewNode}
+ * @param model {es.ModelNode} Model to observe
+ * @param {jQuery} [$element] Element to use as a container
+ */
+es.DocumentViewBranchNode = function( model, $element, horizontal ) {
+	// Inheritance
+	es.DocumentBranchNode.call( this );
+	es.DocumentViewNode.call( this, model, $element );
+
+	// Properties
+	this.horizontal = horizontal || false;
+
+	if ( model ) {
+		// Append existing model children
+		var childModels = model.getChildren();
+		for ( var i = 0; i < childModels.length; i++ ) {
+			this.onAfterPush( childModels[i] );
+		}
+
+		// Observe and mimic changes on model
+		this.model.addListenerMethods( this, {
+			'afterPush': 'onAfterPush',
+			'afterUnshift': 'onAfterUnshift',
+			'afterPop': 'onAfterPop',
+			'afterShift': 'onAfterShift',
+			'afterSplice': 'onAfterSplice',
+			'afterSort': 'onAfterSort',
+			'afterReverse': 'onAfterReverse'
+		} );
+	}
+};
+
+/* Methods */
+
+es.DocumentViewBranchNode.prototype.onAfterPush = function( childModel ) {
+	var childView = childModel.createView();
+	this.emit( 'beforePush', childView );
+	childView.attach( this );
+	childView.on( 'update', this.emitUpdate );
+	// Update children
+	this.children.push( childView );
+	// Update DOM
+	this.$.append( childView.$ );
+	// TODO: adding and deleting classes has to be implemented for unshift, shift, splice, sort
+	// and reverse as well
+	if ( this.children.length === 1 ) {
+		childView.$.addClass('es-viewBranchNode-firstChild');
+	}
+	this.emit( 'afterPush', childView );
+	this.emit( 'update' );
+};
+
+es.DocumentViewBranchNode.prototype.onAfterUnshift = function( childModel ) {
+	var childView = childModel.createView();
+	this.emit( 'beforeUnshift', childView );
+	childView.attach( this );
+	childView.on( 'update', this.emitUpdate );
+	// Update children
+	this.children.unshift( childView );
+	// Update DOM
+	this.$.prepend( childView.$ );
+	this.emit( 'afterUnshift', childView );
+	this.emit( 'update' );
+};
+
+es.DocumentViewBranchNode.prototype.onAfterPop = function() {
+	this.emit( 'beforePop' );
+	// Update children
+	var childView = this.children.pop();
+	childView.detach();
+	childView.removeEventListener( 'update', this.emitUpdate );
+	// Update DOM
+	childView.$.detach();
+	this.emit( 'afterPop' );
+	this.emit( 'update' );
+};
+
+es.DocumentViewBranchNode.prototype.onAfterShift = function() {
+	this.emit( 'beforeShift' );
+	// Update children
+	var childView = this.children.shift();
+	childView.detach();
+	childView.removeEventListener( 'update', this.emitUpdate );
+	// Update DOM
+	childView.$.detach();
+	this.emit( 'afterShift' );
+	this.emit( 'update' );
+};
+
+es.DocumentViewBranchNode.prototype.onAfterSplice = function( index, howmany ) {
+	var i,
+		length,
+		args = Array.prototype.slice.call( arguments, 0 );
+	// Convert models to views and attach them to this node
+	if ( args.length >= 3 ) {
+		for ( i = 2, length = args.length; i < length; i++ ) {
+			args[i] = args[i].createView();
+		}
+	}
+	this.emit.apply( this, ['beforeSplice'].concat( args ) );
+	var removals = this.children.splice.apply( this.children, args );
+	for ( i = 0, length = removals.length; i < length; i++ ) {
+		removals[i].detach();
+		removals[i].removeListener( 'update', this.emitUpdate );
+		// Update DOM
+		removals[i].$.detach();
+	}
+	if ( args.length >= 3 ) {
+		var $target;
+		if ( index ) {
+			// Get the element before the insertion point
+			$anchor = this.$.children().eq( index - 1 );
+		}
+		for ( i = args.length - 1; i >= 2; i-- ) {
+			args[i].attach( this );
+			args[i].on( 'update', this.emitUpdate );
+			if ( index ) {
+				$anchor.after( args[i].$ );
+			} else {
+				this.$.prepend( args[i].$ );
+			}
+		}
+	}
+	this.emit.apply( this, ['afterSplice'].concat( args ) );
+	if ( args.length >= 3 ) {
+		for ( i = 2, length = args.length; i < length; i++ ) {
+			args[i].renderContent();
+		}
+	}
+	this.emit( 'update' );
+};
+
+es.DocumentViewBranchNode.prototype.onAfterSort = function() {
+	this.emit( 'beforeSort' );
+	var childModels = this.model.getChildren();
+	for ( var i = 0; i < childModels.length; i++ ) {
+		for ( var j = 0; j < this.children.length; j++ ) {
+			if ( this.children[j].getModel() === childModels[i] ) {
+				var childView = this.children[j];
+				// Update children
+				this.children.splice( j, 1 );
+				this.children.push( childView );
+				// Update DOM
+				this.$.append( childView.$ );
+			}
+		}
+	}
+	this.emit( 'afterSort' );
+	this.emit( 'update' );
+	this.renderContent();
+};
+
+es.DocumentViewBranchNode.prototype.onAfterReverse = function() {
+	this.emit( 'beforeReverse' );
+	// Update children
+	this.reverse();
+	// Update DOM
+	this.$.children().each( function() {
+		$(this).prependTo( $(this).parent() );
+	} );
+	this.emit( 'afterReverse' );
+	this.emit( 'update' );
+	this.renderContent();
+};
+
+/**
+ * Render content.
+ * 
+ * @method
+ */
+es.DocumentViewBranchNode.prototype.renderContent = function() {
+	for ( var i = 0; i < this.children.length; i++ ) {
+		this.children[i].renderContent();
+	}
+};
+
+/**
+ * Draw selection around a given range.
+ * 
+ * @method
+ * @param {es.Range} range Range of content to draw selection around
+ */
+es.DocumentViewBranchNode.prototype.drawSelection = function( range ) {
+	var selectedNodes = this.selectNodes( range, true );
+	for ( var i = 0; i < this.children.length; i++ ) {
+		if ( selectedNodes.length && this.children[i] === selectedNodes[0].node ) {
+			for ( var j = 0; j < selectedNodes.length; j++ ) {
+				selectedNodes[j].node.drawSelection( selectedNodes[j].range );
+			}
+			i += selectedNodes.length - 1;
+		} else {
+			this.children[i].clearSelection();
+		}
+	}
+};
+
+/**
+ * Clear selection.
+ * 
+ * @method
+ */
+es.DocumentViewBranchNode.prototype.clearSelection = function() {
+	for ( var i = 0; i < this.children.length; i++ ) {
+		this.children[i].clearSelection();
+	}
+};
+
+/**
+ * Gets the nearest offset of a rendered position.
+ * 
+ * @method
+ * @param {es.Position} position Position to get offset for
+ * @returns {Integer} Offset of position
+ */
+es.DocumentViewBranchNode.prototype.getOffsetFromRenderedPosition = function( position ) {
+	if ( this.children.length === 0 ) {
+		return 0;
+	}
+	var node = this.children[0];
+	for ( var i = 1; i < this.children.length; i++ ) {
+		if ( this.horizontal && this.children[i].$.offset().left > position.left ) {
+			break;
+		} else if ( !this.horizontal && this.children[i].$.offset().top > position.top ) {
+			break;			
+		}
+		node = this.children[i];
+	}
+	return node.getParent().getOffsetFromNode( node, true ) +
+		node.getOffsetFromRenderedPosition( position ) + 1;
+};
+
+/**
+ * Gets rendered position of offset within content.
+ * 
+ * @method
+ * @param {Integer} offset Offset to get position for
+ * @returns {es.Position} Position of offset
+ */
+es.DocumentViewBranchNode.prototype.getRenderedPositionFromOffset = function( offset, leftBias ) {
+	var node = this.getNodeFromOffset( offset, true );
+	if ( node !== null ) {
+		return node.getRenderedPositionFromOffset(
+			offset - this.getOffsetFromNode( node, true ) - 1,
+			leftBias
+		);
+	}
+	return null;
+};
+
+es.DocumentViewBranchNode.prototype.getRenderedLineRangeFromOffset = function( offset ) {
+	var node = this.getNodeFromOffset( offset, true );
+	if ( node !== null ) {
+		var nodeOffset = this.getOffsetFromNode( node, true );
+		return es.Range.newFromTranslatedRange(
+			node.getRenderedLineRangeFromOffset( offset - nodeOffset - 1 ),
+			nodeOffset + 1
+		);
+	}
+	return null;
+};
+
+/* Inheritance */
+
+es.extendClass( es.DocumentViewBranchNode, es.DocumentBranchNode );
+es.extendClass( es.DocumentViewBranchNode, es.DocumentViewNode );
 /**
  * Creates an es.DocumentViewLeafNode object.
  * 
@@ -2808,381 +3477,109 @@ es.DocumentViewLeafNode.prototype.getRenderedLineRangeFromOffset = function( off
 es.extendClass( es.DocumentViewLeafNode, es.DocumentLeafNode );
 es.extendClass( es.DocumentViewLeafNode, es.DocumentViewNode );
 /**
- * Creates an es.DocumentNode object.
- * 
- * @class
- * @abstract
- * @constructor
- * @extends {es.EventEmitter}
- */
-es.DocumentNode = function() {
-	// Inheritance
-	es.EventEmitter.call( this );
-
-	// Reusable function for passing update events upstream
-	var _this = this;
-	this.emitUpdate = function() {
-		_this.emit( 'update' );
-	};
-};
-
-/* Methods */
-
-/**
- * Gets the content length.
- * 
- * @method
- * @abstract
- * @returns {Integer} Length of content
- */
-es.DocumentNode.prototype.getContentLength = function() {
-	throw 'DocumentNode.getContentLength not implemented in this subclass:' + this.constructor;
-};
-
-/**
- * Gets the element length.
- * 
- * @method
- * @abstract
- * @returns {Integer} Length of content
- */
-es.DocumentNode.prototype.getElementLength = function() {
-	throw 'DocumentNode.getElementLength not implemented in this subclass:' + this.constructor;
-};
-
-/**
- * Checks if this node has child nodes.
- * 
- * @method
- * @abstract
- * @returns {Boolean} Whether this node has children
- */
-es.DocumentNode.prototype.hasChildren = function() {
-	throw 'DocumentNode.hasChildren not implemented in this subclass:' + this.constructor;
-};
-
-/**
- * Traverse tree of nodes (model or view) upstream and for each traversed node call callback function passing traversed node as a parameter.
- * Callback function is called for node passed as node paramter as well.
- * 
- * @param {es.DocumentNode} node Node from which to start traversing
- * @param {function} callback Callback method to be called for every traversed node
- * @method
- */
-es.DocumentNode.traverseUpstream = function( node, callback ) {
-	while ( node ) {
-		if ( callback ( node ) === false ) {
-			break;
-		}
-		node = node.getParent();
-	}
-};
-
-/**
- * Find the common ancestor of two equal-depth nodes, and return the
- * path from each node to the common ancestor.
- * @param {es.DocumentNode} node1
- * @param {es.DocumentNode} node2
- * @returns {Object|Boolean} Object with keys 'commonAncestor', 'node1Path' and 'node2Path',
- *  or false if there is no common ancestor or if the nodes have unequal depth
- */
-es.DocumentNode.getCommonAncestorPaths = function( node1, node2 ) {
-	var	path1 = [],
-		path2 = [],
-		n1 = node1,
-		n2 = node2;
-	
-	// Move up from n1 and n2 simultaneously until we find the
-	// common ancestor
-	while ( n1 !== n2 ) {
-		// Add these nodes to their respective paths
-		path1.push( n1 );
-		path2.push( n2 );
-		// Move up
-		n1 = n1.getParent();
-		n2 = n2.getParent();
-		if ( n1 === null || n2 === null ) {
-			// Reached a root, so no common ancestor or unequal depth
-			return false;
-		}
-	}
-	
-	// If we got here, we've found the common ancestor, and because we did
-	// simultaneous traversal we also know node1 and node2 have the same depth.
-	return { 'commonAncestor': n1, 'node1Path': path1, 'node2Path': path2 };
-};
-
-/* Inheritance */
-
-es.extendClass( es.DocumentNode, es.EventEmitter );
-/**
- * Creates an es.LinkInspector object.
+ * Creates an es.Inspector object.
  * 
  * @class
  * @constructor
  * @param {es.ToolbarView} toolbar
+ * @param {String} name
  */
-es.LinkInspector = function( toolbar, context ) {
+es.Inspector = function( toolbar, context ) {
 	// Inheritance
-	es.Inspector.call( this, toolbar, context );
+	es.EventEmitter.call( this );
+	if ( !toolbar || !context ) {
+		return;
+	}
 
 	// Properties
-	this.$clearButton = $( '<div class="es-inspector-button es-inspector-clearButton"></div>' )
-		.prependTo( this.$ );
-	this.$.prepend( '<div class="es-inspector-title">Edit link</div>' );
-	this.$locationLabel = $( '<label>URL :</label>' ).appendTo( this.$form );
-	this.$locationInput = $( '<input type="text">' ).appendTo( this.$form );
-	this.initialValue = null;
+	this.toolbar = toolbar;
+	this.context = context;
+	this.$ = $( '<div class="es-inspector"></div>' );
+	this.$closeButton = $( '<div class="es-inspector-button es-inspector-closeButton"></div>' )
+		.appendTo( this.$ );
+	this.$acceptButton = $( '<div class="es-inspector-button es-inspector-acceptButton"></div>' )
+		.appendTo( this.$ );
+	this.$form = $( '<form></form>' ).appendTo( this.$ );
 
 	// Events
 	var _this = this;
-	this.$clearButton.click( function() {
-		if ( $(this).is( '.es-inspector-button-disabled' ) ) {
-			return;
-		}
-		var surfaceView = _this.context.getSurfaceView(),
-			surfaceModel = surfaceView.getModel(),
-			tx = surfaceModel.getDocument().prepareContentAnnotation(
-				surfaceView.currentSelection,
-				'clear',
-				/link\/.*/
-			);
-		surfaceModel.transact( tx );
-		_this.$locationInput.val( '' );
-		_this.context.closeInspector();
+	this.$closeButton.click( function() {
+		_this.context.closeInspector( false );
 	} );
-	this.$locationInput.bind( 'mousedown keydown cut paste', function() {
-		setTimeout( function() {
-			if ( _this.$locationInput.val() !== _this.initialValue ) {
-				_this.$acceptButton.removeClass( 'es-inspector-button-disabled' );
-			} else {
-				_this.$acceptButton.addClass( 'es-inspector-button-disabled' );
-			}
-		}, 0 );
+	this.$acceptButton.click( function() {
+		if ( !$(this).is( '.es-inspector-button-disabled' ) ) {
+			_this.context.closeInspector( true );
+		}
 	} );
-	
-	this.$locationInput.bind( 'focus', function() {
-	   if (_this.$locationInput.val() === '')
-	   {
-	       _this.$locationInput.val('http://');
-	   }
-    });
-};
-
-/* Methods */
-
-es.LinkInspector.prototype.getTitleFromSelection = function() {
-	var surfaceView = this.context.getSurfaceView(),
-		surfaceModel = surfaceView.getModel(),
-		documentModel = surfaceModel.getDocument(),
-		data = documentModel.getData( surfaceView.currentSelection );
-	if ( data.length ) {
-		var annotation = es.DocumentModel.getMatchingAnnotations( data[0], /link\/.*/ );
-		if ( annotation.length ) {
-			annotation = annotation[0];
+	this.$form.submit( function( e ) {
+		_this.context.closeInspector( true );
+		e.preventDefault();
+		return false;
+	} );
+	this.$form.keydown( function( e ) {
+		// Escape
+		if ( e.which === 27 ) {
+			_this.context.closeInspector( false );
+			e.preventDefault();
+			return false;
 		}
-		if ( annotation && annotation.data && annotation.data.title ) {
-			return annotation.data.title;
-		}
+	} );
+};
+
+/* Methods */
+
+es.Inspector.prototype.open = function() {
+	this.$.show();
+	this.context.closeMenu();
+	if ( this.onOpen ) {
+		this.onOpen();
 	}
-	return null;
+	this.emit( 'open' );
 };
 
-es.LinkInspector.prototype.onOpen = function() {
-	var title = this.getTitleFromSelection();
-	if ( title !== null ) {
-		this.$locationInput.val( title );
-		this.$clearButton.removeClass( 'es-inspector-button-disabled' );
-	} else {
-		this.$locationInput.val( '' );
-		this.$clearButton.addClass( 'es-inspector-button-disabled' );
+es.Inspector.prototype.close = function( accept ) {
+	this.$.hide();
+	if ( this.onClose ) {
+		this.onClose( accept );
 	}
-	this.$acceptButton.addClass( 'es-inspector-button-disabled' );
-	this.initialValue = this.$locationInput.val();
-	var _this = this;
-	setTimeout( function() {
-		_this.$locationInput.focus().select();
-	}, 0 );
-};
-
-es.LinkInspector.prototype.onClose = function( accept ) {
-	if ( accept ) {
-		var title = this.$locationInput.val();
-		if ( title === this.getTitleFromSelection() || !title ) {
-			return;
-		}
-		var surfaceView = this.context.getSurfaceView(),
-			surfaceModel = surfaceView.getModel();
-		var clear = surfaceModel.getDocument().prepareContentAnnotation(
-			surfaceView.currentSelection,
-			'clear',
-			/link\/.*/
-		);
-		surfaceModel.transact( clear );
-		var set = surfaceModel.getDocument().prepareContentAnnotation(
-			surfaceView.currentSelection,
-			'set',
-			{ 'type': 'link/internal', 'data': { 'title': title } }
-		);
-		surfaceModel.transact( set );
-	}
+	this.emit( 'close' );
+	try
+	{
+	    surfaceView.$input.focus();
+    }
+    catch (e)
+    {
+        console.error(e);
+    }
 };
 
 /* Inheritance */
 
-es.extendClass( es.LinkInspector, es.Inspector );
+es.extendClass( es.Inspector, es.EventEmitter );
 /**
- * Creates an es.PreModel object.
+ * Creates an es.Tool object.
  * 
  * @class
  * @constructor
- * @extends {es.DocumentModelLeafNode}
- * @param {Object} element Document data element of this node
- * @param {Integer} length Length of document data element
+ * @param {es.ToolbarView} toolbar
+ * @param {String} name
  */
-es.PreModel = function( element, length ) {
-	// Inheritance
-	es.DocumentModelLeafNode.call( this, 'pre', element, length );
+es.Tool = function( toolbar, name, title ) {
+	this.toolbar = toolbar;
+	this.name = name;
+	this.title = title;
+	this.$ = $( '<div class="es-tool"></div>' ).attr( 'title', this.title );
 };
+
+/* Static Members */
+
+es.Tool.tools = {};
 
 /* Methods */
 
-/**
- * Creates a pre view for this model.
- * 
- * @method
- * @returns {es.PreView}
- */
-es.PreModel.prototype.createView = function() {
-	return new es.PreView( this );
+es.Tool.prototype.updateState = function() {
+	throw 'Tool.updateState not implemented in this subclass:' + this.constructor;
 };
-
-/* Registration */
-
-es.DocumentModel.nodeModels.pre = es.PreModel;
-
-es.DocumentModel.nodeRules.pre = {
-	'parents': null,
-	'children': []
-};
-
-/* Inheritance */
-
-es.extendClass( es.PreModel, es.DocumentModelLeafNode );
-/**
- * Creates an es.TableRowModel object.
- * 
- * @class
- * @constructor
- * @extends {es.DocumentModelBranchNode}
- * @param {Object} element Document data element of this node
- * @param {es.DocumentModelNode[]} contents List of child nodes to initially add
- */
-es.TableRowModel = function( element, contents ) {
-	// Inheritance
-	es.DocumentModelBranchNode.call( this, 'tableRow', element, contents );
-};
-
-/* Methods */
-
-/**
- * Creates a table row view for this model.
- * 
- * @method
- * @returns {es.TableRowView}
- */
-es.TableRowModel.prototype.createView = function() {
-	return new es.TableRowView( this );
-};
-
-/* Registration */
-
-es.DocumentModel.nodeModels.tableRow = es.TableRowModel;
-
-es.DocumentModel.nodeRules.tableRow = {
-	'parents': ['table'],
-	'children': ['tableCell']
-};
-
-/* Inheritance */
-
-es.extendClass( es.TableRowModel, es.DocumentModelBranchNode );
-/**
- * Creates an es.ListModel object.
- * 
- * @class
- * @constructor
- * @extends {es.DocumentModelBranchNode}
- * @param {Object} element Document data element of this node
- * @param {es.ListItemModel[]} contents List of child nodes to initially add
- */
-es.ListModel = function( element, contents ) {
-	// Inheritance
-	es.DocumentModelBranchNode.call( this, 'list', element, contents );
-};
-
-/* Methods */
-
-/**
- * Creates a list view for this model.
- * 
- * @method
- * @returns {es.ListView}
- */
-es.ListModel.prototype.createView = function() {
-	return new es.ListView( this );
-};
-
-/* Registration */
-
-es.DocumentModel.nodeModels.list = es.ListModel;
-
-es.DocumentModel.nodeRules.list = {
-	'parents': null,
-	'children': ['listItem']
-};
-
-/* Inheritance */
-
-es.extendClass( es.ListModel, es.DocumentModelBranchNode );
-/**
- * Creates an es.TableCellModel object.
- * 
- * @class
- * @constructor
- * @extends {es.DocumentModelBranchNode}
- * @param {Object} element Document data element of this node
- * @param {es.DocumentModelNode[]} contents List of child nodes to initially add
- */
-es.TableCellModel = function( element, contents ) {
-	// Inheritance
-	es.DocumentModelBranchNode.call( this, 'tableCell', element, contents );
-};
-
-/* Methods */
-
-/**
- * Creates a table cell view for this model.
- * 
- * @method
- * @returns {es.TableCellView}
- */
-es.TableCellModel.prototype.createView = function() {
-	return new es.TableCellView( this );
-};
-
-/* Registration */
-
-es.DocumentModel.nodeModels.tableCell = es.TableCellModel;
-
-es.DocumentModel.nodeRules.tableCell = {
-	'parents': ['tableRow'],
-	'children': null
-};
-
-/* Inheritance */
-
-es.extendClass( es.TableCellModel, es.DocumentModelBranchNode );
 /**
  * Creates an es.SurfaceModel object.
  * 
@@ -3339,82 +3736,6 @@ es.SurfaceModel.prototype.redo = function() {
 /* Inheritance */
 
 es.extendClass( es.SurfaceModel, es.EventEmitter );
-/**
- * Creates an es.HeadingModel object.
- * 
- * @class
- * @constructor
- * @extends {es.DocumentModelLeafNode}
- * @param {Object} element Document data element of this node
- * @param {Integer} length Length of document data element
- */
-es.HeadingModel = function( element, length ) {
-	// Inheritance
-	es.DocumentModelLeafNode.call( this, 'heading', element, length );
-};
-
-/* Methods */
-
-/**
- * Creates a heading view for this model.
- * 
- * @method
- * @returns {es.ParagraphView}
- */
-es.HeadingModel.prototype.createView = function() {
-	return new es.HeadingView( this );
-};
-
-/* Registration */
-
-es.DocumentModel.nodeModels.heading = es.HeadingModel;
-
-es.DocumentModel.nodeRules.heading = {
-	'parents': null,
-	'children': []
-};
-
-/* Inheritance */
-
-es.extendClass( es.HeadingModel, es.DocumentModelLeafNode );
-/**
- * Creates an es.ListItemModel object.
- * 
- * @class
- * @constructor
- * @extends {es.DocumentModelLeafNode}
- * @param {Object} element Document data element of this node
- * @param {Integer} length Length of document data element
- */
-es.ListItemModel = function( element, contents ) {
-	// Inheritance
-	es.DocumentModelBranchNode.call( this, 'listItem', element, contents );
-};
-
-/* Methods */
-
-/**
- * Creates a list item view for this model.
- * 
- * @method
- * @returns {es.ListItemView}
- */
-es.ListItemModel.prototype.createView = function() {
-	return new es.ListItemView( this );
-};
-
-/* Registration */
-
-es.DocumentModel.nodeModels.listItem = es.ListItemModel;
-
-es.DocumentModel.nodeRules.listItem = {
-	'parents': ['list'],
-	'children': null
-};
-
-/* Inheritance */
-
-es.extendClass( es.ListItemModel, es.DocumentModelBranchNode );
 /**
  * Creates an es.DocumentModel object.
  * 
@@ -4661,6 +4982,158 @@ es.DocumentModel.prototype.prepareLeafConversion = function( range, type, attrib
 
 es.extendClass( es.DocumentModel, es.DocumentModelBranchNode );
 /**
+ * Creates an es.ParagraphModel object.
+ * 
+ * @class
+ * @constructor
+ * @extends {es.DocumentModelLeafNode}
+ * @param {Object} element Document data element of this node
+ * @param {Integer} length Length of document data element
+ */
+es.ParagraphModel = function( element, length ) {
+	// Inheritance
+	es.DocumentModelLeafNode.call( this, 'paragraph', element, length );
+};
+
+/* Methods */
+
+/**
+ * Creates a paragraph view for this model.
+ * 
+ * @method
+ * @returns {es.ParagraphView}
+ */
+es.ParagraphModel.prototype.createView = function() {
+	return new es.ParagraphView( this );
+};
+
+/* Registration */
+
+es.DocumentModel.nodeModels.paragraph = es.ParagraphModel;
+
+es.DocumentModel.nodeRules.paragraph = {
+	'parents': null,
+	'children': []
+};
+
+/* Inheritance */
+
+es.extendClass( es.ParagraphModel, es.DocumentModelLeafNode );
+/**
+ * Creates an es.PreModel object.
+ * 
+ * @class
+ * @constructor
+ * @extends {es.DocumentModelLeafNode}
+ * @param {Object} element Document data element of this node
+ * @param {Integer} length Length of document data element
+ */
+es.PreModel = function( element, length ) {
+	// Inheritance
+	es.DocumentModelLeafNode.call( this, 'pre', element, length );
+};
+
+/* Methods */
+
+/**
+ * Creates a pre view for this model.
+ * 
+ * @method
+ * @returns {es.PreView}
+ */
+es.PreModel.prototype.createView = function() {
+	return new es.PreView( this );
+};
+
+/* Registration */
+
+es.DocumentModel.nodeModels.pre = es.PreModel;
+
+es.DocumentModel.nodeRules.pre = {
+	'parents': null,
+	'children': []
+};
+
+/* Inheritance */
+
+es.extendClass( es.PreModel, es.DocumentModelLeafNode );
+/**
+ * Creates an es.ListModel object.
+ * 
+ * @class
+ * @constructor
+ * @extends {es.DocumentModelBranchNode}
+ * @param {Object} element Document data element of this node
+ * @param {es.ListItemModel[]} contents List of child nodes to initially add
+ */
+es.ListModel = function( element, contents ) {
+	// Inheritance
+	es.DocumentModelBranchNode.call( this, 'list', element, contents );
+};
+
+/* Methods */
+
+/**
+ * Creates a list view for this model.
+ * 
+ * @method
+ * @returns {es.ListView}
+ */
+es.ListModel.prototype.createView = function() {
+	return new es.ListView( this );
+};
+
+/* Registration */
+
+es.DocumentModel.nodeModels.list = es.ListModel;
+
+es.DocumentModel.nodeRules.list = {
+	'parents': null,
+	'children': ['listItem']
+};
+
+/* Inheritance */
+
+es.extendClass( es.ListModel, es.DocumentModelBranchNode );
+/**
+ * Creates an es.ListItemModel object.
+ * 
+ * @class
+ * @constructor
+ * @extends {es.DocumentModelLeafNode}
+ * @param {Object} element Document data element of this node
+ * @param {Integer} length Length of document data element
+ */
+es.ListItemModel = function( element, contents ) {
+	// Inheritance
+	es.DocumentModelBranchNode.call( this, 'listItem', element, contents );
+};
+
+/* Methods */
+
+/**
+ * Creates a list item view for this model.
+ * 
+ * @method
+ * @returns {es.ListItemView}
+ */
+es.ListItemModel.prototype.createView = function() {
+	return new es.ListItemView( this );
+};
+
+/* Registration */
+
+es.DocumentModel.nodeModels.listItem = es.ListItemModel;
+
+es.DocumentModel.nodeRules.listItem = {
+	'parents': ['list'],
+	'children': null
+};
+
+/* Inheritance */
+
+es.extendClass( es.ListItemModel, es.DocumentModelBranchNode );
+/**
  * Creates an es.TableModel object.
  * 
  * @class
@@ -4698,6 +5171,120 @@ es.DocumentModel.nodeRules.table = {
 /* Inheritance */
 
 es.extendClass( es.TableModel, es.DocumentModelBranchNode );
+/**
+ * Creates an es.TableRowModel object.
+ * 
+ * @class
+ * @constructor
+ * @extends {es.DocumentModelBranchNode}
+ * @param {Object} element Document data element of this node
+ * @param {es.DocumentModelNode[]} contents List of child nodes to initially add
+ */
+es.TableRowModel = function( element, contents ) {
+	// Inheritance
+	es.DocumentModelBranchNode.call( this, 'tableRow', element, contents );
+};
+
+/* Methods */
+
+/**
+ * Creates a table row view for this model.
+ * 
+ * @method
+ * @returns {es.TableRowView}
+ */
+es.TableRowModel.prototype.createView = function() {
+	return new es.TableRowView( this );
+};
+
+/* Registration */
+
+es.DocumentModel.nodeModels.tableRow = es.TableRowModel;
+
+es.DocumentModel.nodeRules.tableRow = {
+	'parents': ['table'],
+	'children': ['tableCell']
+};
+
+/* Inheritance */
+
+es.extendClass( es.TableRowModel, es.DocumentModelBranchNode );
+/**
+ * Creates an es.TableCellModel object.
+ * 
+ * @class
+ * @constructor
+ * @extends {es.DocumentModelBranchNode}
+ * @param {Object} element Document data element of this node
+ * @param {es.DocumentModelNode[]} contents List of child nodes to initially add
+ */
+es.TableCellModel = function( element, contents ) {
+	// Inheritance
+	es.DocumentModelBranchNode.call( this, 'tableCell', element, contents );
+};
+
+/* Methods */
+
+/**
+ * Creates a table cell view for this model.
+ * 
+ * @method
+ * @returns {es.TableCellView}
+ */
+es.TableCellModel.prototype.createView = function() {
+	return new es.TableCellView( this );
+};
+
+/* Registration */
+
+es.DocumentModel.nodeModels.tableCell = es.TableCellModel;
+
+es.DocumentModel.nodeRules.tableCell = {
+	'parents': ['tableRow'],
+	'children': null
+};
+
+/* Inheritance */
+
+es.extendClass( es.TableCellModel, es.DocumentModelBranchNode );
+/**
+ * Creates an es.HeadingModel object.
+ * 
+ * @class
+ * @constructor
+ * @extends {es.DocumentModelLeafNode}
+ * @param {Object} element Document data element of this node
+ * @param {Integer} length Length of document data element
+ */
+es.HeadingModel = function( element, length ) {
+	// Inheritance
+	es.DocumentModelLeafNode.call( this, 'heading', element, length );
+};
+
+/* Methods */
+
+/**
+ * Creates a heading view for this model.
+ * 
+ * @method
+ * @returns {es.ParagraphView}
+ */
+es.HeadingModel.prototype.createView = function() {
+	return new es.HeadingView( this );
+};
+
+/* Registration */
+
+es.DocumentModel.nodeModels.heading = es.HeadingModel;
+
+es.DocumentModel.nodeRules.heading = {
+	'parents': null,
+	'children': []
+};
+
+/* Inheritance */
+
+es.extendClass( es.HeadingModel, es.DocumentModelLeafNode );
 /**
  * Creates an es.TransactionModel object.
  * 
@@ -4837,889 +5424,121 @@ es.TransactionModel.prototype.pushStopAnnotating = function( method, annotation 
 	} );
 };
 /**
- * Creates an es.ParagraphModel object.
- * 
- * @class
- * @constructor
- * @extends {es.DocumentModelLeafNode}
- * @param {Object} element Document data element of this node
- * @param {Integer} length Length of document data element
- */
-es.ParagraphModel = function( element, length ) {
-	// Inheritance
-	es.DocumentModelLeafNode.call( this, 'paragraph', element, length );
-};
-
-/* Methods */
-
-/**
- * Creates a paragraph view for this model.
- * 
- * @method
- * @returns {es.ParagraphView}
- */
-es.ParagraphModel.prototype.createView = function() {
-	return new es.ParagraphView( this );
-};
-
-/* Registration */
-
-es.DocumentModel.nodeModels.paragraph = es.ParagraphModel;
-
-es.DocumentModel.nodeRules.paragraph = {
-	'parents': null,
-	'children': []
-};
-
-/* Inheritance */
-
-es.extendClass( es.ParagraphModel, es.DocumentModelLeafNode );
-/**
- * Creates an annotation renderer object.
- * 
- * @class
- * @constructor
- * @property annotations {Object} List of annotations to be applied
- */
-es.AnnotationSerializer = function() {
-	this.annotations = {};
-};
-
-/* Static Methods */
-
-/**
- * Adds a set of annotations to be inserted around a range of text.
- * 
- * Insertions for the same range will be nested in order of declaration.
- * @example
- *     stack = new es.AnnotationSerializer();
- *     stack.add( new es.Range( 1, 2 ), '[', ']' );
- *     stack.add( new es.Range( 1, 2 ), '{', '}' );
- *     // Outputs: "a[{b}]c"
- *     console.log( stack.render( 'abc' ) );
- * 
- * @method
- * @param {es.Range} range Range to insert text around
- * @param {String} pre Text to insert before range
- * @param {String} post Text to insert after range
- */
-es.AnnotationSerializer.prototype.add = function( range, pre, post ) {
-	// Normalize the range if it can be normalized
-	if ( typeof range.normalize === 'function' ) {
-		range.normalize();
-	}
-	if ( !( range.start in this.annotations ) ) {
-		this.annotations[range.start] = [pre];
-	} else {
-		this.annotations[range.start].push( pre );
-	}
-	if ( !( range.end in this.annotations ) ) {
-		this.annotations[range.end] = [post];
-	} else {
-		this.annotations[range.end].unshift( post );
-	}
-};
-
-/**
- * Adds a set of HTML tags to be inserted around a range of text.
- * 
- * @method
- * @param {es.Range} range Range to insert text around
- * @param {String} type Tag name
- * @param {Object} [attributes] List of HTML attributes
- */
-es.AnnotationSerializer.prototype.addTags = function( range, type, attributes ) {
-	this.add( range, es.Html.makeOpeningTag( type, attributes ), es.Html.makeClosingTag( type ) );
-};
-
-/**
- * Renders annotations into text.
- * 
- * @method
- * @param {String} text Text to apply annotations to
- * @returns {String} Wrapped text
- */
-es.AnnotationSerializer.prototype.render = function( text ) {
-	var out = '';
-	for ( var i = 0, length = text.length; i <= length; i++ ) {
-		if ( i in this.annotations ) {
-			out += this.annotations[i].join( '' );
-		}
-		if ( i < length ) {
-			out += text[i];
-		}
-	}
-	return out;
-};
-/**
- * Serializes a WikiDom plain object into an HTML string.
- * 
- * @class
- * @constructor
- * @param {Object} options List of options for serialization
- */
-es.HtmlSerializer = function( options ) {
-	this.options = $.extend( {
-		// defaults
-	}, options || {} );
-};
-
-/* Static Methods */
-
-/**
- * Get a serialized version of data.
- * 
- * @static
- * @method
- * @param {Object} data Data to serialize
- * @param {Object} options Options to use, @see {es.WikitextSerializer} for details
- * @returns {String} Serialized version of data
- */
-es.HtmlSerializer.stringify = function( data, options ) {
-	return ( new es.HtmlSerializer( options ) ).document( data );
-};
-
-es.HtmlSerializer.getHtmlAttributes = function( attributes ) {
-	var htmlAttributes = {},
-		count = 0;
-	for ( var key in attributes ) {
-		if ( key.indexOf( 'html/' ) === 0 ) {
-			htmlAttributes[key.substr( 5 )] = attributes[key];
-			count++;
-		}
-	}
-	return count ? htmlAttributes : null;
-};
-
-/* Methods */
-
-es.HtmlSerializer.prototype.document = function( node, rawFirstParagraph ) {
-	var lines = [];
-	for ( var i = 0, length = node.children.length; i < length; i++ ) {
-		var childNode = node.children[i];
-		if ( childNode.type in this ) {
-			// Special case for paragraphs which have particular wrapping needs
-			if ( childNode.type === 'paragraph' ) {
-				lines.push( this.paragraph( childNode, rawFirstParagraph && i === 0 ) );
-			} else {
-				lines.push( this[childNode.type].call( this, childNode ) );
-			}
-		}
-	}
-	return lines.join( '\n' );
-};
-
-es.HtmlSerializer.prototype.comment = function( node ) {
-	return '<!--(' + node.text + ')-->';
-};
-
-es.HtmlSerializer.prototype.pre = function( node ) {
-	return es.Html.makeTag(
-		'pre', {}, this.content( node.content, true )
-	);
-};
-
-es.HtmlSerializer.prototype.horizontalRule = function( node ) {
-	return es.Html.makeTag( 'hr', {}, false );
-};
-
-es.HtmlSerializer.prototype.heading = function( node ) {
-	return es.Html.makeTag(
-		'h' + node.attributes.level, {}, this.content( node.content )
-	);
-};
-
-es.HtmlSerializer.prototype.paragraph = function( node, raw ) {
-	if ( raw ) {
-		return this.content( node.content );
-	} else {
-		return es.Html.makeTag( 'p', {}, this.content( node.content ) );
-	}
-};
-
-es.HtmlSerializer.prototype.list = function( node ) {
-	var out = [],    // List of list nodes
-		bstack = [], // Bullet stack, previous element's listStyles
-		bnext  = [], // Next element's listStyles
-		closeTags  = []; // Stack of close tags for currently active lists
-
-	function commonPrefixLength( x, y ) {
-		var minLength = Math.min(x.length, y.length);
-		for(var i = 0; i < minLength; i++) {
-			if (x[i] !== y[i]) {
-				// Both description and term are
-				// inside dls, so consider them equivalent here.
-				var diffs =  [x[i], y[i]].sort();
-				if (diffs[0] !== 'description' &&
-						diffs[1] !== 'term' ) {
-							break;
-						}
-			}
-		}
-		return i;
-	}
-
-	function popTags( n ) {
-		for (var i = 0; i < n; i++ ) {
-			out.push(closeTags.pop());
-		}
-	}
-
-	function openLists( bs, bn, attribs ) {
-		var prefix = commonPrefixLength (bs, bn);
-		// pop close tags from stack
-		popTags(closeTags.length - prefix);
-		for(var i = prefix; i < bn.length; i++) {
-			var c = bn[i];
-			switch (c) {
-				case 'bullet':
-					out.push(es.Html.makeOpeningTag('ul', attribs));
-					closeTags.push(es.Html.makeClosingTag('ul'));
-					break;
-				case 'number':
-					out.push(es.Html.makeOpeningTag('ol', attribs));
-					closeTags.push(es.Html.makeClosingTag('ol'));
-					break;
-				case 'term':
-				case 'description':
-					out.push(es.Html.makeOpeningTag('dl', attribs));
-					closeTags.push(es.Html.makeClosingTag('dl'));
-					break;
-				default:
-					throw("Unknown node prefix " + c);
-			}
-		}
-	}
-
-	for (var i = 0, length = node.children.length; i < length; i++) {
-		var e = node.children[i];
-		bnext = e.attributes.styles;
-		delete e.attributes.styles;
-		openLists( bstack, bnext, e.attributes );
-		var tag;
-		switch(bnext[bnext.length - 1]) {
-			case 'term':
-				tag = 'dt'; break;
-			case 'description':
-				tag = 'dd'; break;
-			default:
-				tag = 'li'; break;
-		}
-		out.push( es.Html.makeTag(tag, e.attributes, this.document( e ) ) );
-		bstack = bnext;
-	}
-	popTags(closeTags.length);
-	return out.join("\n");
-};
-
-es.HtmlSerializer.prototype.table = function( node ) {
-	var lines = [],
-		attributes = es.HtmlSerializer.getHtmlAttributes( node.attributes );
-	lines.push( es.Html.makeOpeningTag( 'table', attributes ) );
-	for ( var i = 0, length = node.children.length; i < length; i++ ) {
-		var child = node.children[i];
-		lines.push( this[child.type]( child ) );
-	}
-	lines.push( es.Html.makeClosingTag( 'table' ) );
-	return lines.join( '\n' );
-};
-
-es.HtmlSerializer.prototype.tableRow = function( node ) {
-	var lines = [],
-		attributes = es.HtmlSerializer.getHtmlAttributes( node.attributes );
-	lines.push( es.Html.makeOpeningTag( 'tr', attributes ) );
-	for ( var i = 0, length = node.children.length; i < length; i++ ) {
-		lines.push( this.tableCell( node.children[i] ) );
-	}
-	lines.push( es.Html.makeClosingTag( 'tr' ) );
-	return lines.join( '\n' );
-};
-
-es.HtmlSerializer.prototype.tableCell = function( node ) {
-	var symbolTable = {
-			'tableHeading': 'th',
-			'tableCell': 'td'
-		},
-		attributes = es.HtmlSerializer.getHtmlAttributes( node.attributes );
-	return es.Html.makeTag( symbolTable[node.type], attributes, this.document( node, true ) );
-};
-
-es.HtmlSerializer.prototype.tableCaption = function( node ) {
-	attributes = es.HtmlSerializer.getHtmlAttributes( node.attributes );
-	return es.Html.makeTag( 'caption', attributes, this.content( node.content ) );
-};
-
-es.HtmlSerializer.prototype.transclusion = function( node ) {
-	var title = [];
-	if ( node.namespace !== 'Main' ) {
-		title.push( node.namespace );
-	}
-	title.push( node.title );
-	title = title.join( ':' );
-	return es.Html.makeTag( 'a', { 'href': '/wiki/' + title }, title );
-};
-
-es.HtmlSerializer.prototype.parameter = function( node ) {
-	return '{{{' + node.name + '}}}';
-};
-
-es.HtmlSerializer.prototype.content = function( node ) {
-	if ( 'annotations' in node && node.annotations.length ) {
-		var annotationSerializer = new es.AnnotationSerializer(),
-			tagTable = {
-				'textStyle/bold': 'b',
-				'textStyle/italic': 'i',
-				'textStyle/strong': 'strong',
-				'textStyle/emphasize': 'em',
-				'textStyle/big': 'big',
-				'textStyle/small': 'small',
-				'textStyle/superScript': 'sup',
-				'textStyle/subScript': 'sub'
-			};
-		for ( var i = 0, length = node.annotations.length; i < length; i++ ) {
-			var annotation = node.annotations[i];
-			if ( annotation.type in tagTable ) {
-				annotationSerializer.addTags( annotation.range, tagTable[annotation.type] );
-			} else {
-				switch ( annotation.type ) {
-					case 'link/external':
-						annotationSerializer.addTags(
-							annotation.range, 'a', { 'href': annotation.data.url }
-						);
-						break;
-					case 'link/internal':
-						annotationSerializer.addTags(
-							annotation.range, 'a', { 'href': '/wiki/' + annotation.data.title }
-						);
-						break;
-					case 'object/template':
-					case 'object/hook':
-						annotationSerializer.add( annotation.range, annotation.data.html, '' );
-						break;
-				}
-			}
-		}
-		return annotationSerializer.render( node.text );
-	} else {
-		return node.text;
-	}
-};
-/**
- * Serializes a WikiDom plain object into a Wikitext string.
- * 
- * @class
- * @constructor
- * @param options {Object} List of options for serialization
- */
-es.WikitextSerializer = function( options ) {
-	this.options = $.extend( {
-		// defaults
-	}, options || {} );
-};
-
-/* Static Methods */
-
-/**
- * Get a serialized version of data.
- * 
- * @static
- * @method
- * @param {Object} data Data to serialize
- * @param {Object} options Options to use, @see {es.WikitextSerializer} for details
- * @returns {String} Serialized version of data
- */
-es.WikitextSerializer.stringify = function( data, options ) {
-	return ( new es.WikitextSerializer( options ) ).document( data );
-};
-
-es.WikitextSerializer.getHtmlAttributes = function( attributes ) {
-	var htmlAttributes = {},
-		count = 0;
-	for ( var key in attributes ) {
-		if ( key.indexOf( 'html/' ) === 0 ) {
-			htmlAttributes[key.substr( 5 )] = attributes[key];
-			count++;
-		}
-	}
-	return count ? htmlAttributes : null;
-};
-
-/* Methods */
-
-es.WikitextSerializer.prototype.document = function( node, rawFirstParagraph ) {
-	var lines = [];
-	for ( var i = 0, length = node.children.length; i < length; i++ ) {
-		var childNode = node.children[i];
-		if ( childNode.type in this ) {
-			// Special case for paragraphs which have particular spacing needs
-			if ( childNode.type === 'paragraph' ) {
-				lines.push( this.paragraph( childNode, rawFirstParagraph && i === 0 ) );
-				if ( i + 1 < length /* && node.children[i + 1].type === 'paragraph' */ ) {
-					lines.push( '' );
-				}
-			} else {
-				lines.push( this[childNode.type].call( this, childNode ) );
-			}
-		}
-	}
-	return lines.join( '\n' );
-};
-
-es.WikitextSerializer.prototype.comment = function( node ) {
-	return '<!--' + node.text + '-->';
-};
-
-es.WikitextSerializer.prototype.horizontalRule = function( node ) {
-	return '----';
-};
-
-es.WikitextSerializer.prototype.heading = function( node ) {
-	var symbols = es.repeatString( '=', node.attributes.level );
-	return symbols + this.content( node.content ) + symbols;
-};
-
-es.WikitextSerializer.prototype.paragraph = function( node ) {
-	return this.content( node.content );
-};
-
-es.WikitextSerializer.prototype.pre = function( node ) {
-	return ' ' + this.content( node.content ).replace( '\n', '\n ' );
-};
-
-es.WikitextSerializer.prototype.list = function( node ) {
-	var symbolTable = {
-		'bullet': '*',
-		'number': '#',
-		'term': ';',
-		'description': ':'
-	};
-	function convertStyles( styles ) {
-		var symbols = '';
-		for ( var i = 0, length = styles.length; i < length; i++ ) {
-			symbols += styles[i] in symbolTable ? symbolTable[styles[i]] : '';
-		}
-		return symbols;
-	}
-	var lines = [];
-	for ( var i = 0, length = node.children.length; i < length; i++ ) {
-		var childNode = node.children[i];
-		lines.push(
-			convertStyles( childNode.attributes.styles ) + ' ' +
-				this.document( childNode )
-		);
-	}
-	return lines.join( '\n' ) + '\n';
-};
-
-es.WikitextSerializer.prototype.table = function( node ) {
-	var lines = [],
-		attributes = es.WikitextSerializer.getHtmlAttributes( node.attributes );
-	if ( attributes ) {
-		attributes = es.Html.makeAttributeList( attributes );
-	}
-	lines.push( '{|' + attributes );
-	for ( var i = 0, length = node.children.length; i < length; i++ ) {
-		lines.push( this.tableRow( node.children[i], i === 0 ) );
-	}
-	lines.push( '|}' );
-	return lines.join( '\n' );
-};
-
-es.WikitextSerializer.prototype.tableRow = function( node, first ) {
-	var lines = [],
-		attributes = es.WikitextSerializer.getHtmlAttributes( node.attributes );
-	if ( attributes ) {
-		attributes = es.Html.makeAttributeList( attributes );
-	}
-	if ( !first || attributes ) {
-		lines.push( '|-' + attributes );
-	}
-	for ( var i = 0, length = node.children.length; i < length; i++ ) {
-		lines.push( this.tableCell( node.children[i] ) );
-	}
-	return lines.join( '\n' );
-};
-
-es.WikitextSerializer.prototype.tableCell = function( node ) {
-	var symbolTable = {
-		'tableHeading': '!',
-		'tableCell': '|'
-	};
-	var attributes = es.WikitextSerializer.getHtmlAttributes( node.attributes );
-	if ( attributes ) {
-		attributes = es.Html.makeAttributeList( attributes ) + '|';
-	}
-	return symbolTable[node.type] + attributes + this.document( node, true );
-};
-
-es.WikitextSerializer.prototype.transclusion = function( node ) {
-	var title = [];
-	if ( node.namespace === 'Main' ) {
-		title.push( '' );
-	} else if ( node.namespace !== 'Template' ) {
-		title.push( node.namespace );
-	}
-	title.push( node.title );
-	return '{{' + title.join( ':' ) + '}}';
-};
-
-es.WikitextSerializer.prototype.parameter = function( node ) {
-	return '{{{' + node.name + '}}}';
-};
-
-es.WikitextSerializer.prototype.content = function( node ) {
-	if ( 'annotations' in node && node.annotations.length ) {
-		var annotationSerializer = new es.AnnotationSerializer(),
-			tagTable = {
-				'textStyle/strong': 'strong',
-				'textStyle/emphasize': 'em',
-				'textStyle/big': 'big',
-				'textStyle/small': 'small',
-				'textStyle/superScript': 'sup',
-				'textStyle/subScript': 'sub'
-			},
-			markupTable = {
-				'textStyle/bold': "'''",
-				'textStyle/italic': "''"
-			};
-		for ( var i = 0, length = node.annotations.length; i < length; i++ ) {
-			var annotation = node.annotations[i];
-			if ( annotation.type in tagTable ) {
-				annotationSerializer.addTags( annotation.range, tagTable[annotation.type] );
-			} else if ( annotation.type in markupTable ) {
-				annotationSerializer.add(
-					annotation.range, markupTable[annotation.type], markupTable[annotation.type]
-				);
-			} else {
-				switch ( annotation.type ) {
-					case 'link/external':
-						annotationSerializer.add(
-							annotation.range, '[' + annotation.data.href + ' ', ']'
-						);
-						break;
-					case 'link/internal':
-						annotationSerializer.add(
-							annotation.range, '[[' + annotation.data.title + '|', ']]'
-						);
-						break;
-				}
-			}
-		}
-		return annotationSerializer.render( node.text );
-	} else {
-		return node.text;
-	}
-};
-/**
- * Serializes a WikiDom plain object into a JSON string.
- * 
- * @class
- * @constructor
- * @param {Object} options List of options for serialization
- * @param {String} options.indentWith Text to use as indentation, such as \t or 4 spaces
- * @param {String} options.joinWith Text to use as line joiner, such as \n or '' (empty string)
- */
-es.JsonSerializer = function( options ) {
-	this.options = $.extend( {
-		'indentWith': '\t',
-		'joinWith': '\n'
-	}, options || {} );
-};
-
-/* Static Methods */
-
-/**
- * Get a serialized version of data.
- * 
- * @static
- * @method
- * @param {Object} data Data to serialize
- * @param {Object} options Options to use, @see {es.JsonSerializer} for details
- * @returns {String} Serialized version of data
- */
-es.JsonSerializer.stringify = function( data, options ) {
-	return ( new es.JsonSerializer( options ) ).stringify( data );
-};
-
-/**
- * Gets the type of a given value.
- * 
- * @static
- * @method
- * @param {Mixed} value Value to get type of
- * @returns {String} Symbolic name of type
- */
-es.JsonSerializer.typeOf = function( value ) {
-	if ( typeof value === 'object' ) {
-		if ( value === null ) {
-			return 'null';
-		}
-		switch ( value.constructor ) {
-			case [].constructor:
-				return 'array';
-			case ( new Date() ).constructor:
-				return 'date';
-			case ( new RegExp() ).constructor:
-				return 'regex';
-			default:
-				return 'object';
-		}
-	}
-	return typeof value;
-};
-
-/* Methods */
-
-/**
- * Get a serialized version of data.
- * 
- * @method
- * @param {Object} data Data to serialize
- * @param {String} indentation String to prepend each line with (used internally with recursion)
- * @returns {String} Serialized version of data
- */
-es.JsonSerializer.prototype.stringify = function( data, indention ) {
-	if ( indention === undefined ) {
-		indention = '';
-	}
-	var type = es.JsonSerializer.typeOf( data ),
-		key;
-	
-	// Open object/array
-	var json = '';
-	if ( type === 'array' ) {
-		if (data.length === 0) {
-			// Empty array
-			return '[]';
-		}
-		json += '[';
-	} else {
-		var empty = true;
-		for ( key in data ) {
-			if ( data.hasOwnProperty( key ) ) {
-				empty = false;
-				break;
-			}
-		}
-		if ( empty ) {
-			return '{}';
-		}
-		json += '{';
-	}
-	
-	// Iterate over items
-	var comma = false;
-	for ( key in data ) {
-		if ( data.hasOwnProperty( key ) ) {
-			json += ( comma ? ',' : '' ) + this.options.joinWith + indention +
-				this.options.indentWith + ( type === 'array' ? '' : '"' + key + '"' + ': ' );
-			switch ( es.JsonSerializer.typeOf( data[key] ) ) {
-				case 'array':
-				case 'object':
-					json += this.stringify( data[key], indention + this.options.indentWith );
-					break;
-				case 'boolean':
-				case 'number':
-					json += data[key].toString();
-					break;
-				case 'null':
-					json += 'null';
-					break;
-				case 'string':
-					json += '"' + data[key].replace(/[\n]/g, '\\n').replace(/[\t]/g, '\\t') + '"';
-					break;
-				// Skip other types
-			}
-			comma = true;
-		}
-	}
-	
-	// Close object/array
-	json += this.options.joinWith + indention + ( type === 'array' ? ']' : '}' );
-	
-	return json;
-};
-/**
- * Creates an es.FormatDropdownTool object.
- * 
- * @class
- * @constructor
- * @extends {es.DropdownTool}
- * @param {es.ToolbarView} toolbar
- * @param {String} name
- * @param {Object[]} items
- */
-es.FormatDropdownTool = function( toolbar, name, title ) {
-	// Inheritance
-	es.DropdownTool.call( this, toolbar, name, title, [
-		{ 
-			'name': 'paragraph',
-			'label': 'Paragraph',
-			'type' : 'paragraph'
-		},
-		{
-			'name': 'heading-1',
-			'label': 'Heading 1',
-			'type' : 'heading',
-			'attributes': { 'level': 1 }
-		},
-		{
-			'name': 'heading-2',
-			'label': 'Heading 2',
-			'type' : 'heading',
-			'attributes': { 'level': 2 }
-		},
-		{
-			'name': 'heading-3',
-			'label': 'Heading 3',
-			'type' : 'heading',
-			'attributes': { 'level': 3 }
-		}/*,
-		{
-			'name': 'heading-4',
-			'label': 'Heading 4',
-			'type' : 'heading',
-			'attributes': { 'level': 4 }
-		},
-		{
-			'name': 'heading-5',
-			'label': 'Heading 5',
-			'type' : 'heading',
-			'attributes': { 'level': 5 }
-		},
-		{
-			'name': 'heading-6',
-			'label': 'Heading 6',
-			'type' : 'heading',
-			'attributes': { 'level': 6 }
-		}*/,
-		{
-			'name': 'pre',
-			'label': 'Preformatted',
-			'type' : 'pre'
-		}
-	] );
-};
-
-/* Methods */
-
-es.FormatDropdownTool.prototype.onSelect = function( item ) {
-	var txs = this.toolbar.surfaceView.model.getDocument().prepareLeafConversion(
-		this.toolbar.surfaceView.currentSelection,
-		item.type,
-		item.attributes
-	);
-	for ( var i = 0; i < txs.length; i++ ) {
-		this.toolbar.surfaceView.model.transact( txs[i] );
-	}
-};
-
-es.FormatDropdownTool.prototype.updateState = function( annotations, nodes ) {
-	// Get type and attributes of the first node
-	var i,
-		format = {
-			'type': nodes[0].getElementType(),
-			'attributes': nodes[0].getElement().attributes
-		};
-	// Look for mismatches, in which case format should be null
-	for ( i = 1; i < nodes.length; i++ ) {
-		if ( format.type != nodes[i].getElementType() ||
-			!es.compareObjects( format.attributes, nodes[i].element.attributes ) ) {
-			format = null;
-			break;
-		}
-	}
-	
-	if ( format === null ) {
-		this.$label.html( '&nbsp;' );
-	} else {
-		var items = this.menuView.getItems();
-		for ( i = 0; i < items.length; i++ ) {
-			if (
-				format.type === items[i].type &&
-				es.compareObjects( format.attributes, items[i].attributes )
-			) {
-				this.$label.text( items[i].label );
-				break;
-			}
-		}
-	}
-};
-
-/* Registration */
-
-es.Tool.tools.format = {
-	'constructor': es.FormatDropdownTool,
-	'name': 'format',
-	'title': 'Change format'
-};
-
-/* Inheritance */
-
-es.extendClass( es.FormatDropdownTool, es.DropdownTool );
-/**
- * Creates an es.DropdownTool object.
+ * Creates an es.LinkInspector object.
  * 
  * @class
  * @constructor
  * @param {es.ToolbarView} toolbar
- * @param {String} name
- * @param {Object[]} items
  */
-es.DropdownTool = function( toolbar, name, title, items ) {
+es.LinkInspector = function( toolbar, context ) {
 	// Inheritance
-	es.Tool.call( this, toolbar, name, title );
-	if ( !name ) {
-		return;
-	}
+	es.Inspector.call( this, toolbar, context );
 
 	// Properties
-	var _this = this;
-	this.menuView = new es.MenuView( items, function( item ) {
-		_this.onSelect( item );
-		_this.$label.text( item.label );
-	}, this.$ );
-	this.$label = $( '<div class="es-toolbarDropdownTool-label"></div>' ).appendTo( this.$ );
+	this.$clearButton = $( '<div class="es-inspector-button es-inspector-clearButton"></div>' )
+		.prependTo( this.$ );
+	this.$.prepend( '<div class="es-inspector-title">Edit link</div>' );
+	this.$locationLabel = $( '<label>URL :</label>' ).appendTo( this.$form );
+	this.$locationInput = $( '<input type="text">' ).appendTo( this.$form );
+	this.initialValue = null;
 
 	// Events
-	$( document )
-		.add( this.toolbar.surfaceView.$ )
-			.mousedown( function( e ) {
-				if ( e.which === 1 ) {
-					_this.menuView.close();
-				}
-			} );
-	this.$.bind( {
-		'mousedown': function( e ) {
-			if ( e.which === 1 ) {
-				e.preventDefault();
-				return false;
-			}
-		},
-		'mouseup': function( e ) {
-			// Don't respond to menu clicks
-			var $item = $( e.target ).closest( '.es-menuView' );
-			if ( e.which === 1 && $item.length === 0 ) {
-				_this.menuView.open();
-			} else {
-				_this.menuView.close();
-			}
+	var _this = this;
+	this.$clearButton.click( function() {
+		if ( $(this).is( '.es-inspector-button-disabled' ) ) {
+			return;
 		}
+		var surfaceView = _this.context.getSurfaceView(),
+			surfaceModel = surfaceView.getModel(),
+			tx = surfaceModel.getDocument().prepareContentAnnotation(
+				surfaceView.currentSelection,
+				'clear',
+				/link\/.*/
+			);
+		surfaceModel.transact( tx );
+		_this.$locationInput.val( '' );
+		_this.context.closeInspector();
 	} );
-
-	// DOM Changes
-	this.$.addClass( 'es-toolbarDropdownTool' ).addClass( 'es-toolbarDropdownTool-' + name );
+	this.$locationInput.bind( 'mousedown keydown cut paste', function() {
+		setTimeout( function() {
+			if ( _this.$locationInput.val() !== _this.initialValue ) {
+				_this.$acceptButton.removeClass( 'es-inspector-button-disabled' );
+			} else {
+				_this.$acceptButton.addClass( 'es-inspector-button-disabled' );
+			}
+		}, 0 );
+	} );
+	
+	this.$locationInput.bind( 'focus', function() {
+	   if (_this.$locationInput.val() === '')
+	   {
+	       _this.$locationInput.val('http://');
+	   }
+    });
 };
 
 /* Methods */
 
-es.DropdownTool.prototype.onSelect = function( item ) {
-	throw 'DropdownTool.onSelect not implemented in this subclass:' + this.constructor;
+es.LinkInspector.prototype.getTitleFromSelection = function() {
+	var surfaceView = this.context.getSurfaceView(),
+		surfaceModel = surfaceView.getModel(),
+		documentModel = surfaceModel.getDocument(),
+		data = documentModel.getData( surfaceView.currentSelection );
+	if ( data.length ) {
+		var annotation = es.DocumentModel.getMatchingAnnotations( data[0], /link\/.*/ );
+		if ( annotation.length ) {
+			annotation = annotation[0];
+		}
+		if ( annotation && annotation.data && annotation.data.title ) {
+			return annotation.data.title;
+		}
+	}
+	return null;
+};
+
+es.LinkInspector.prototype.onOpen = function() {
+	var title = this.getTitleFromSelection();
+	if ( title !== null ) {
+		this.$locationInput.val( title );
+		this.$clearButton.removeClass( 'es-inspector-button-disabled' );
+	} else {
+		this.$locationInput.val( '' );
+		this.$clearButton.addClass( 'es-inspector-button-disabled' );
+	}
+	this.$acceptButton.addClass( 'es-inspector-button-disabled' );
+	this.initialValue = this.$locationInput.val();
+	var _this = this;
+	setTimeout( function() {
+		_this.$locationInput.focus().select();
+	}, 0 );
+};
+
+es.LinkInspector.prototype.onClose = function( accept ) {
+	if ( accept ) {
+		var title = this.$locationInput.val();
+		if ( title === this.getTitleFromSelection() || !title ) {
+			return;
+		}
+		var surfaceView = this.context.getSurfaceView(),
+			surfaceModel = surfaceView.getModel();
+		var clear = surfaceModel.getDocument().prepareContentAnnotation(
+			surfaceView.currentSelection,
+			'clear',
+			/link\/.*/
+		);
+		surfaceModel.transact( clear );
+		var set = surfaceModel.getDocument().prepareContentAnnotation(
+			surfaceView.currentSelection,
+			'set',
+			{ 'type': 'link/internal', 'data': { 'title': title } }
+		);
+		surfaceModel.transact( set );
+	}
 };
 
 /* Inheritance */
 
-es.extendClass( es.DropdownTool, es.Tool );
+es.extendClass( es.LinkInspector, es.Inspector );
 /**
  * Creates an es.ButtonTool object.
  * 
@@ -5764,6 +5583,221 @@ es.ButtonTool.prototype.onClick = function() {
 /* Inheritance */
 
 es.extendClass( es.ButtonTool, es.Tool );/**
+ * Creates an es.AnnotationButtonTool object.
+ * 
+ * @class
+ * @constructor
+ * @extends {es.ButtonTool}
+ * @param {es.ToolbarView} toolbar
+ * @param {String} name
+ * @param {Object} annotation
+ */
+es.AnnotationButtonTool = function( toolbar, name, title, data ) {
+	// Inheritance
+	es.ButtonTool.call( this, toolbar, name, title );
+
+	// Properties
+	this.annotation = data.annotation;
+	this.inspector = data.inspector;
+	this.active = false;
+};
+
+/* Methods */
+
+es.AnnotationButtonTool.prototype.onClick = function() {
+	var surfaceView = this.toolbar.getSurfaceView();
+	if ( this.inspector ) {
+		if ( surfaceView.getModel().getSelection().getLength() ) {
+			this.toolbar.getSurfaceView().getContextView().openInspector( this.inspector );
+		} else {
+			if ( this.active ) {
+				var surfaceModel = surfaceView.getModel(),
+					documentModel = surfaceModel.getDocument(),
+					selection = surfaceModel.getSelection(),
+					range = documentModel.getAnnotationBoundaries( selection.from, this.annotation, true );
+				surfaceModel.select( range );
+				this.toolbar.getSurfaceView().getContextView().openInspector( this.inspector );
+			}
+		}
+	} else {
+		surfaceView.annotate( this.active ? 'clear' : 'set', this.annotation );
+	}
+};
+
+es.AnnotationButtonTool.prototype.updateState = function( annotations, nodes ) {
+	if ( es.DocumentModel.getIndexOfAnnotation( annotations.full, this.annotation, true ) !== -1 ) {
+		this.$.addClass( 'es-toolbarButtonTool-down' );
+		this.active = true;
+		return;
+	}
+	this.$.removeClass( 'es-toolbarButtonTool-down' );
+	this.active = false;
+};
+
+/* Registration */
+
+es.Tool.tools.bold = {
+	'constructor': es.AnnotationButtonTool,
+	'name': 'bold',
+	'title': 'Bold (ctrl/cmd + B)',
+	'data': {
+		'annotation': { 'type': 'textStyle/bold' }
+	}
+};
+
+es.Tool.tools.italic = {
+	'constructor': es.AnnotationButtonTool,
+	'name': 'italic',
+	'title': 'Italic (ctrl/cmd + I)',
+	'data': {
+		'annotation': { 'type': 'textStyle/italic' }
+	}
+};
+
+es.Tool.tools.link = {
+	'constructor': es.AnnotationButtonTool,
+	'name': 'link',
+	'title': 'Link (ctrl/cmd + K)',
+	'data': {
+		'annotation': { 'type': 'link/internal', 'data': { 'title': '' } },
+		'inspector': 'link'
+	}
+};
+
+es.Tool.tools.strong = {
+	'constructor': es.AnnotationButtonTool,
+	'name': 'strong',
+	'title': 'Strong (ctrl/cmd + B)',
+	'data': {
+		'annotation': { 'type': 'textStyle/strong' }
+	}
+};
+es.Tool.tools.em = {
+	'constructor': es.AnnotationButtonTool,
+	'name': 'em',
+	'title': 'Emphase (ctrl/cmd + I)',
+	'data': {
+		'annotation': { 'type': 'textStyle/emphasize' }
+	}
+};
+es.Tool.tools.del = {
+	'constructor': es.AnnotationButtonTool,
+	'name': 'del',
+	'title': 'Del (ctrl/cmd + D)',
+	'data': {
+		'annotation': { 'type': 'textStyle/delete' }
+	}
+};
+
+/* Inheritance */
+
+es.extendClass( es.AnnotationButtonTool, es.ButtonTool );
+/**
+ * Creates an es.ClearButtonTool object.
+ * 
+ * @class
+ * @constructor
+ * @extends {es.ButtonTool}
+ * @param {es.ToolbarView} toolbar
+ * @param {String} name
+ */
+es.ClearButtonTool = function( toolbar, name, title ) {
+	// Inheritance
+	es.ButtonTool.call( this, toolbar, name, title );
+
+	// Properties
+	this.$.addClass( 'es-toolbarButtonTool-disabled' );
+	this.pattern = /(textStyle\/|link\/).*/;
+};
+
+/* Methods */
+
+es.ClearButtonTool.prototype.onClick = function() {
+	var surfaceView = this.toolbar.getSurfaceView(),
+		surfaceModel = surfaceView.getModel(),
+		tx =surfaceModel.getDocument().prepareContentAnnotation(
+			surfaceView.currentSelection,
+			'clear',
+			this.pattern
+		);
+	surfaceModel.transact( tx );
+	surfaceView.clearInsertionAnnotations();
+	surfaceView.getContextView().closeInspector();
+};
+
+es.ClearButtonTool.prototype.updateState = function( annotations ) {
+	var matchingAnnotations = es.DocumentModel.getMatchingAnnotations(
+		annotations.all, this.pattern
+	);
+	if ( matchingAnnotations.length === 0 ) {
+		this.$.addClass( 'es-toolbarButtonTool-disabled' );
+	} else {
+		this.$.removeClass( 'es-toolbarButtonTool-disabled' );
+	}
+};
+
+/* Registration */
+
+es.Tool.tools.clear = {
+	'constructor': es.ClearButtonTool,
+	'name': 'clear',
+	'title': 'Clear formatting'
+};
+
+/* Inheritance */
+
+es.extendClass( es.ClearButtonTool, es.ButtonTool );/**
+ * Creates an es.HistoryButtonTool object.
+ * 
+ * @class
+ * @constructor
+ * @extends {es.ButtonTool}
+ * @param {es.ToolbarView} toolbar
+ * @param {String} name
+ */
+es.HistoryButtonTool = function( toolbar, name, title, data ) {
+	// Inheritance
+	es.ButtonTool.call( this, toolbar, name, title );
+
+	// Properties
+	this.data = data;
+};
+
+/* Methods */
+
+es.HistoryButtonTool.prototype.onClick = function() {
+	switch ( this.name ) {
+		case 'undo':
+			this.toolbar.surfaceView.model.undo( 1 );
+			break;
+		case 'redo':
+			this.toolbar.surfaceView.model.redo( 1 );
+			break;
+	}
+};
+
+es.HistoryButtonTool.prototype.updateState = function( annotations ) {
+	//
+};
+
+/* Registration */
+
+es.Tool.tools.undo = {
+	'constructor': es.HistoryButtonTool,
+	'name': 'undo',
+	'title': 'Undo (ctrl/cmd + Z)'
+};
+
+es.Tool.tools.redo = {
+	'constructor': es.HistoryButtonTool,
+	'name': 'redo',
+	'title': 'Redo (ctrl/cmd + shift + Z)'
+};
+
+/* Inhertiance */
+
+es.extendClass( es.HistoryButtonTool, es.ButtonTool );
+/**
  * Creates an es.ListButtonTool object.
  * 
  * @class
@@ -6086,170 +6120,6 @@ es.Tool.tools.bullet = {
 
 es.extendClass( es.ListButtonTool, es.ButtonTool );
 /**
- * Creates an es.AnnotationButtonTool object.
- * 
- * @class
- * @constructor
- * @extends {es.ButtonTool}
- * @param {es.ToolbarView} toolbar
- * @param {String} name
- * @param {Object} annotation
- */
-es.AnnotationButtonTool = function( toolbar, name, title, data ) {
-	// Inheritance
-	es.ButtonTool.call( this, toolbar, name, title );
-
-	// Properties
-	this.annotation = data.annotation;
-	this.inspector = data.inspector;
-	this.active = false;
-};
-
-/* Methods */
-
-es.AnnotationButtonTool.prototype.onClick = function() {
-	var surfaceView = this.toolbar.getSurfaceView();
-	if ( this.inspector ) {
-		if ( surfaceView.getModel().getSelection().getLength() ) {
-			this.toolbar.getSurfaceView().getContextView().openInspector( this.inspector );
-		} else {
-			if ( this.active ) {
-				var surfaceModel = surfaceView.getModel(),
-					documentModel = surfaceModel.getDocument(),
-					selection = surfaceModel.getSelection(),
-					range = documentModel.getAnnotationBoundaries( selection.from, this.annotation, true );
-				surfaceModel.select( range );
-				this.toolbar.getSurfaceView().getContextView().openInspector( this.inspector );
-			}
-		}
-	} else {
-		surfaceView.annotate( this.active ? 'clear' : 'set', this.annotation );
-	}
-};
-
-es.AnnotationButtonTool.prototype.updateState = function( annotations, nodes ) {
-	if ( es.DocumentModel.getIndexOfAnnotation( annotations.full, this.annotation, true ) !== -1 ) {
-		this.$.addClass( 'es-toolbarButtonTool-down' );
-		this.active = true;
-		return;
-	}
-	this.$.removeClass( 'es-toolbarButtonTool-down' );
-	this.active = false;
-};
-
-/* Registration */
-
-es.Tool.tools.bold = {
-	'constructor': es.AnnotationButtonTool,
-	'name': 'bold',
-	'title': 'Bold (ctrl/cmd + B)',
-	'data': {
-		'annotation': { 'type': 'textStyle/bold' }
-	}
-};
-
-es.Tool.tools.italic = {
-	'constructor': es.AnnotationButtonTool,
-	'name': 'italic',
-	'title': 'Italic (ctrl/cmd + I)',
-	'data': {
-		'annotation': { 'type': 'textStyle/italic' }
-	}
-};
-
-es.Tool.tools.link = {
-	'constructor': es.AnnotationButtonTool,
-	'name': 'link',
-	'title': 'Link (ctrl/cmd + K)',
-	'data': {
-		'annotation': { 'type': 'link/internal', 'data': { 'title': '' } },
-		'inspector': 'link'
-	}
-};
-
-es.Tool.tools.strong = {
-	'constructor': es.AnnotationButtonTool,
-	'name': 'strong',
-	'title': 'Strong (ctrl/cmd + B)',
-	'data': {
-		'annotation': { 'type': 'textStyle/strong' }
-	}
-};
-es.Tool.tools.em = {
-	'constructor': es.AnnotationButtonTool,
-	'name': 'em',
-	'title': 'Emphase (ctrl/cmd + I)',
-	'data': {
-		'annotation': { 'type': 'textStyle/emphasize' }
-	}
-};
-es.Tool.tools.del = {
-	'constructor': es.AnnotationButtonTool,
-	'name': 'del',
-	'title': 'Del (ctrl/cmd + D)',
-	'data': {
-		'annotation': { 'type': 'textStyle/delete' }
-	}
-};
-
-/* Inheritance */
-
-es.extendClass( es.AnnotationButtonTool, es.ButtonTool );
-/**
- * Creates an es.ClearButtonTool object.
- * 
- * @class
- * @constructor
- * @extends {es.ButtonTool}
- * @param {es.ToolbarView} toolbar
- * @param {String} name
- */
-es.ClearButtonTool = function( toolbar, name, title ) {
-	// Inheritance
-	es.ButtonTool.call( this, toolbar, name, title );
-
-	// Properties
-	this.$.addClass( 'es-toolbarButtonTool-disabled' );
-	this.pattern = /(textStyle\/|link\/).*/;
-};
-
-/* Methods */
-
-es.ClearButtonTool.prototype.onClick = function() {
-	var surfaceView = this.toolbar.getSurfaceView(),
-		surfaceModel = surfaceView.getModel(),
-		tx =surfaceModel.getDocument().prepareContentAnnotation(
-			surfaceView.currentSelection,
-			'clear',
-			this.pattern
-		);
-	surfaceModel.transact( tx );
-	surfaceView.clearInsertionAnnotations();
-	surfaceView.getContextView().closeInspector();
-};
-
-es.ClearButtonTool.prototype.updateState = function( annotations ) {
-	var matchingAnnotations = es.DocumentModel.getMatchingAnnotations(
-		annotations.all, this.pattern
-	);
-	if ( matchingAnnotations.length === 0 ) {
-		this.$.addClass( 'es-toolbarButtonTool-disabled' );
-	} else {
-		this.$.removeClass( 'es-toolbarButtonTool-disabled' );
-	}
-};
-
-/* Registration */
-
-es.Tool.tools.clear = {
-	'constructor': es.ClearButtonTool,
-	'name': 'clear',
-	'title': 'Clear formatting'
-};
-
-/* Inheritance */
-
-es.extendClass( es.ClearButtonTool, es.ButtonTool );/**
  * Creates an es.IndentationButtonTool object.
  * 
  * @class
@@ -6365,56 +6235,186 @@ es.Tool.tools.outdent = {
 /* Inheritance */
 
 es.extendClass( es.IndentationButtonTool, es.ButtonTool );/**
- * Creates an es.HistoryButtonTool object.
+ * Creates an es.DropdownTool object.
  * 
  * @class
  * @constructor
- * @extends {es.ButtonTool}
  * @param {es.ToolbarView} toolbar
  * @param {String} name
+ * @param {Object[]} items
  */
-es.HistoryButtonTool = function( toolbar, name, title, data ) {
+es.DropdownTool = function( toolbar, name, title, items ) {
 	// Inheritance
-	es.ButtonTool.call( this, toolbar, name, title );
+	es.Tool.call( this, toolbar, name, title );
+	if ( !name ) {
+		return;
+	}
 
 	// Properties
-	this.data = data;
+	var _this = this;
+	this.menuView = new es.MenuView( items, function( item ) {
+		_this.onSelect( item );
+		_this.$label.text( item.label );
+	}, this.$ );
+	this.$label = $( '<div class="es-toolbarDropdownTool-label"></div>' ).appendTo( this.$ );
+
+	// Events
+	$( document )
+		.add( this.toolbar.surfaceView.$ )
+			.mousedown( function( e ) {
+				if ( e.which === 1 ) {
+					_this.menuView.close();
+				}
+			} );
+	this.$.bind( {
+		'mousedown': function( e ) {
+			if ( e.which === 1 ) {
+				e.preventDefault();
+				return false;
+			}
+		},
+		'mouseup': function( e ) {
+			// Don't respond to menu clicks
+			var $item = $( e.target ).closest( '.es-menuView' );
+			if ( e.which === 1 && $item.length === 0 ) {
+				_this.menuView.open();
+			} else {
+				_this.menuView.close();
+			}
+		}
+	} );
+
+	// DOM Changes
+	this.$.addClass( 'es-toolbarDropdownTool' ).addClass( 'es-toolbarDropdownTool-' + name );
 };
 
 /* Methods */
 
-es.HistoryButtonTool.prototype.onClick = function() {
-	switch ( this.name ) {
-		case 'undo':
-			this.toolbar.surfaceView.model.undo( 1 );
-			break;
-		case 'redo':
-			this.toolbar.surfaceView.model.redo( 1 );
-			break;
+es.DropdownTool.prototype.onSelect = function( item ) {
+	throw 'DropdownTool.onSelect not implemented in this subclass:' + this.constructor;
+};
+
+/* Inheritance */
+
+es.extendClass( es.DropdownTool, es.Tool );
+/**
+ * Creates an es.FormatDropdownTool object.
+ * 
+ * @class
+ * @constructor
+ * @extends {es.DropdownTool}
+ * @param {es.ToolbarView} toolbar
+ * @param {String} name
+ * @param {Object[]} items
+ */
+es.FormatDropdownTool = function( toolbar, name, title ) {
+	// Inheritance
+	es.DropdownTool.call( this, toolbar, name, title, [
+		{ 
+			'name': 'paragraph',
+			'label': 'Paragraph',
+			'type' : 'paragraph'
+		},
+		{
+			'name': 'heading-1',
+			'label': 'Heading 1',
+			'type' : 'heading',
+			'attributes': { 'level': 1 }
+		},
+		{
+			'name': 'heading-2',
+			'label': 'Heading 2',
+			'type' : 'heading',
+			'attributes': { 'level': 2 }
+		},
+		{
+			'name': 'heading-3',
+			'label': 'Heading 3',
+			'type' : 'heading',
+			'attributes': { 'level': 3 }
+		}/*,
+		{
+			'name': 'heading-4',
+			'label': 'Heading 4',
+			'type' : 'heading',
+			'attributes': { 'level': 4 }
+		},
+		{
+			'name': 'heading-5',
+			'label': 'Heading 5',
+			'type' : 'heading',
+			'attributes': { 'level': 5 }
+		},
+		{
+			'name': 'heading-6',
+			'label': 'Heading 6',
+			'type' : 'heading',
+			'attributes': { 'level': 6 }
+		}*/,
+		{
+			'name': 'pre',
+			'label': 'Preformatted',
+			'type' : 'pre'
+		}
+	] );
+};
+
+/* Methods */
+
+es.FormatDropdownTool.prototype.onSelect = function( item ) {
+	var txs = this.toolbar.surfaceView.model.getDocument().prepareLeafConversion(
+		this.toolbar.surfaceView.currentSelection,
+		item.type,
+		item.attributes
+	);
+	for ( var i = 0; i < txs.length; i++ ) {
+		this.toolbar.surfaceView.model.transact( txs[i] );
 	}
 };
 
-es.HistoryButtonTool.prototype.updateState = function( annotations ) {
-	//
+es.FormatDropdownTool.prototype.updateState = function( annotations, nodes ) {
+	// Get type and attributes of the first node
+	var i,
+		format = {
+			'type': nodes[0].getElementType(),
+			'attributes': nodes[0].getElement().attributes
+		};
+	// Look for mismatches, in which case format should be null
+	for ( i = 1; i < nodes.length; i++ ) {
+		if ( format.type != nodes[i].getElementType() ||
+			!es.compareObjects( format.attributes, nodes[i].element.attributes ) ) {
+			format = null;
+			break;
+		}
+	}
+	
+	if ( format === null ) {
+		this.$label.html( '&nbsp;' );
+	} else {
+		var items = this.menuView.getItems();
+		for ( i = 0; i < items.length; i++ ) {
+			if (
+				format.type === items[i].type &&
+				es.compareObjects( format.attributes, items[i].attributes )
+			) {
+				this.$label.text( items[i].label );
+				break;
+			}
+		}
+	}
 };
 
 /* Registration */
 
-es.Tool.tools.undo = {
-	'constructor': es.HistoryButtonTool,
-	'name': 'undo',
-	'title': 'Undo (ctrl/cmd + Z)'
+es.Tool.tools.format = {
+	'constructor': es.FormatDropdownTool,
+	'name': 'format',
+	'title': 'Change format'
 };
 
-es.Tool.tools.redo = {
-	'constructor': es.HistoryButtonTool,
-	'name': 'redo',
-	'title': 'Redo (ctrl/cmd + shift + Z)'
-};
+/* Inheritance */
 
-/* Inhertiance */
-
-es.extendClass( es.HistoryButtonTool, es.ButtonTool );
+es.extendClass( es.FormatDropdownTool, es.DropdownTool );
 /**
  * Creates an es.SurfaceView object.
  * 
@@ -7437,165 +7437,73 @@ es.SurfaceView.prototype.hideCursor = function() {
 /* Inheritance */
 
 es.extendClass( es.SurfaceView, es.EventEmitter );
-/**
- * Creates an es.ListView object.
- * 
- * @class
- * @constructor
- * @extends {es.DocumentViewBranchNode}
- * @param {es.ListModel} model List model to view
- */
-es.ListView = function( model ) {
-	// Inheritance
-	es.DocumentViewBranchNode.call( this, model );
-
-	// DOM Changes
-	this.$.addClass( 'es-listView' );
-
-	// Events
-	var _this = this;
-	this.model.on( 'update', function() {
-		_this.enumerate();
-	} );
-
-	// Initialization
-	this.enumerate();
-};
-
-/* Methods */
-
-/**
- * Set the number labels of all ordered list items.
- * 
- * @method
- */
-es.ListView.prototype.enumerate = function() {
-	var styles,
-		levels = [];
-	for ( var i = 0; i < this.children.length; i++ ) {
-		styles = this.children[i].model.getElementAttribute( 'styles' );
-		levels = levels.slice( 0, styles.length );
-		if ( styles[styles.length - 1] === 'number' ) {
-			if ( !levels[styles.length - 1] ) {
-				levels[styles.length - 1] = 0;
-			}
-			this.children[i].$icon.text( ++levels[styles.length - 1] + '.' );
-		} else {
-			this.children[i].$icon.text( '' );
-			if ( levels[styles.length - 1] ) {
-				levels[styles.length - 1] = 0;
-			}
-		}
+// ToolbarView
+es.ToolbarView = function( $container, surfaceView, config ) {
+	// Inheritance TODO: Do we still need it?
+	es.EventEmitter.call( this );
+	if ( !surfaceView ) {
+		return;
 	}
-};
 
-/* Registration */
-
-es.DocumentView.splitRules.list = {
-	'self': false,
-	'children': true
-};
-
-/* Inheritance */
-
-es.extendClass( es.ListView, es.DocumentViewBranchNode );
-/**
- * Creates an es.ParagraphView object.
- * 
- * @class
- * @constructor
- * @extends {es.DocumentViewLeafNode}
- * @param {es.ParagraphModel} model Paragraph model to view
- */
-es.ParagraphView = function( model ) {
-	// Inheritance
-	es.DocumentViewLeafNode.call( this, model );
-
-	// DOM Changes
-	this.$.addClass( 'es-paragraphView' );
-};
-
-/* Registration */
-
-es.DocumentView.splitRules.paragraph = {
-	'self': true,
-	'children': null
-};
-
-/* Inheritance */
-
-es.extendClass( es.ParagraphView, es.DocumentViewLeafNode );
-/**
- * Creates an es.DocumentView object.
- * 
- * @class
- * @constructor
- * @extends {es.DocumentViewBranchNode}
- * @param {es.DocumentModel} documentModel Document model to view
- * @param {es.SurfaceView} surfaceView Surface view this view is a child of
- */
-es.DocumentView = function( model, surfaceView ) {
-	// Inheritance
-	es.DocumentViewBranchNode.call( this, model );
+	// References for use in closures
+	var	_this = this,
+		$window = $( window );	
 
 	// Properties
 	this.surfaceView = surfaceView;
+	this.$ = $container;
+	this.$groups = $( '<div class="es-toolbarGroups"></div>' ).prependTo( this.$ );
+	this.tools = [];
 
-	// DOM Changes
-	this.$.addClass( 'es-documentView' );
+	this.surfaceView.on( 'cursor', function( annotations, nodes ) {
+		for( var i = 0; i < _this.tools.length; i++ ) {
+			_this.tools[i].updateState( annotations, nodes );
+		}
+	} );
+
+	this.config = config || [
+		{ 'name': 'history', 'items' : ['undo', 'redo'] },
+		{ 'name': 'textStyle', 'items' : ['format'] },
+		{ 'name': 'textStyle', 'items' : ['strong', 'em', 'del', 'link', 'clear'] },
+		{ 'name': 'list', 'items' : ['number', 'bullet', 'outdent', 'indent'] }
+	];
+	this.setup();
 };
-
-/* Static Members */
-
-
-/**
- * Mapping of symbolic names and splitting rules.
- * 
- * Each rule is an object with a self and children property. Each of these properties may contain
- * one of two possible values:
- *     Boolean - Whether a split is allowed
- *     Null - Node is a leaf, so there's nothing to split
- * 
- * @example Paragraph rules
- *     {
- *         'self': true
- *         'children': null
- *     }
- * @example List rules
- *     {
- *         'self': false,
- *         'children': true
- *     }
- * @example ListItem rules
- *     {
- *         'self': true,
- *         'children': false
- *     }
- */
-es.DocumentView.splitRules = {};
 
 /* Methods */
 
-/**
- * Get the document offset of a position created from passed DOM event
- * 
- * @method
- * @param e {Event} Event to create es.Position from
- * @returns {Integer} Document offset
- */
-es.DocumentView.prototype.getOffsetFromEvent = function( e ) {
-	var position = es.Position.newFromEventPagePosition( e );
-	return this.getOffsetFromRenderedPosition( position );
+es.ToolbarView.prototype.getSurfaceView = function() {
+	return this.surfaceView;
 };
 
-es.DocumentView.splitRules.document = {
-	'self': false,
-	'children': true
+es.ToolbarView.prototype.setup = function() {
+	for ( var i = 0; i < this.config.length; i++ ) {
+		var	$group = $( '<div>' )
+			.addClass( 'es-toolbarGroup' )
+			.addClass( 'es-toolbarGroup-' + this.config[i].name );
+		if ( this.config[i].label ) {
+			$group.append(
+				$( '<div>' ).addClass( 'es-toolbarLabel' ).html( this.config[i].label )
+			);
+		}
+
+		for ( var j = 0; j < this.config[i].items.length; j++ ) {
+			var toolDefintion = es.Tool.tools[ this.config[i].items[j] ];
+			
+			if ( toolDefintion ) {
+				var tool = new toolDefintion.constructor(
+					this, toolDefintion.name, toolDefintion.title, toolDefintion.data
+				);
+				this.tools.push( tool );
+				$group.append( tool.$ );
+			}
+		}
+
+		this.$groups.append( $group ); 
+	}
 };
 
-/* Inheritance */
-
-es.extendClass( es.DocumentView, es.DocumentViewBranchNode );
+es.extendClass( es.ToolbarView, es.EventEmitter );
 /**
  * Creates an es.ContentView object.
  * 
@@ -8527,343 +8435,6 @@ es.ContentView.prototype.getHtml = function( range, options ) {
 
 es.extendClass( es.ContentView, es.EventEmitter );
 /**
- * Creates an es.TableRowView object.
- * 
- * @class
- * @constructor
- * @extends {es.DocumentViewBranchNode}
- * @param {es.TableRowModel} model Table row model to view
- */
-es.TableRowView = function( model ) {
-	// Inheritance
-	es.DocumentViewBranchNode.call( this, model, $( '<tr>' ), true );
-	
-	// DOM Changes
-	this.$
-		.attr( 'style', model.getElementAttribute( 'html/style' ) )
-		.addClass( 'es-tableRowView' );
-};
-
-/* Registration */
-
-es.DocumentView.splitRules.tableRow = {
-	'self': false,
-	'children': false
-};
-
-/* Inheritance */
-
-es.extendClass( es.TableRowView, es.DocumentViewBranchNode );
-/**
- * Creates an es.TableView object.
- * 
- * @class
- * @constructor
- * @extends {es.DocumentViewBranchNode}
- * @param {es.TableModel} model Table model to view
- */
-es.TableView = function( model ) {
-	// Inheritance
-	es.DocumentViewBranchNode.call( this, model, $( '<table>' ) );
-	
-	// DOM Changes
-	this.$
-		.attr( 'style', model.getElementAttribute( 'html/style' ) )
-		.addClass( 'es-tableView' );
-};
-
-/* Registration */
-
-es.DocumentView.splitRules.table = {
-	'self': false,
-	'children': false
-};
-
-/* Inheritance */
-
-es.extendClass( es.TableView, es.DocumentViewBranchNode );
-/**
- * Creates an es.ListItemView object.
- * 
- * @class
- * @constructor
- * @extends {es.DocumentViewLeafNode}
- * @param {es.ListItemModel} model List item model to view
- */
-es.ListItemView = function( model ) {
-	// Inheritance
-	es.DocumentViewBranchNode.call( this, model );
-
-	// Properties
-	this.$icon = $( '<div class="es-listItemView-icon"></div>' ).prependTo( this.$ );
-	this.currentStylesHash = null;
-	
-	// DOM Changes
-	this.$.addClass( 'es-listItemView' );
-
-	// Events
-	var _this = this;
-	this.model.on( 'update', function() {
-		_this.setClasses();
-	} );
-
-	// Initialization
-	this.setClasses();
-};
-
-/* Methods */
-
-es.ListItemView.prototype.setClasses = function() {
-	var styles = this.model.getElementAttribute( 'styles' ),
-		stylesHash = styles.join( '|' );
-	if ( this.currentStylesHash !== stylesHash ) {
-		this.currentStylesHash = stylesHash;
-		var classes = this.$.attr( 'class' );
-		this.$
-			// Remove any existing level classes
-			.attr(
-				'class',
-				classes
-					.replace( / ?es-listItemView-level[0-9]+/, '' )
-					.replace( / ?es-listItemView-(bullet|number|term|definition)/, '' )
-			)
-			// Set the list style class from the style on top of the stack
-			.addClass( 'es-listItemView-' + styles[styles.length - 1] )
-			// Set the list level class from the length of the stack
-			.addClass( 'es-listItemView-level' + ( styles.length - 1 ) );
-	}
-};
-
-/* Registration */
-
-es.DocumentView.splitRules.listItem = {
-	'self': true,
-	'children': false
-};
-
-/* Inheritance */
-
-es.extendClass( es.ListItemView, es.DocumentViewBranchNode );
-/**
- * Creates an es.MenuView object.
- * 
- * @class
- * @constructor
- * @param {Object[]} items List of items to append initially
- * @param {Function} callback Function to call if an item doesn't have it's own callback
- * @param {jQuery} [$overlay=$( 'body' )] DOM selection to add nodes to
- */
-es.MenuView = function( items, callback, $overlay ) {
-	// Properties
-	this.$ = $( '<div class="es-menuView"></div>' ).appendTo( $overlay || $( 'body' ) );
-	this.items = [];
-	this.autoNamedBreaks = 0;
-	this.callback = callback;
-
-	// Items
-	if ( es.isArray( items ) ) {
-		for ( var i = 0; i < items.length; i++ ) {
-			this.addItem( items[i] );
-		}
-	}
-
-	// Events
-	var _this = this;
-	this.$.bind( {
-		'mousedown': function( e ) {
-			if ( e.which === 1 ) {
-				e.preventDefault();
-				return false;
-			}
-		},
-		'mouseup': function( e ) {
-			if ( e.which === 1 ) {
-				var $item = $( e.target ).closest( '.es-menuView-item' );
-				if ( $item.length ) {
-					var name = $item.attr( 'rel' );
-					for ( var i = 0; i < _this.items.length; i++ ) {
-						if ( _this.items[i].name === name ) {
-							_this.onSelect( _this.items[i], e );
-							return true;
-						}
-					}
-				}
-			}
-		}
-	} );
-};
-
-/* Methods */
-
-es.MenuView.prototype.addItem = function( item, before ) {
-	if ( item === '-' ) {
-		item = {
-			'name': 'break-' + this.autoNamedBreaks++
-		};
-	}
-	// Items that don't have custom DOM elements will be auto-created
-	if ( !item.$ ) {
-		if ( !item.name ) {
-			throw 'Invalid menu item error. Items must have a name property.';
-		}
-		if ( item.label ) {
-			item.$ = $( '<div class="es-menuView-item"></div>' )
-				.attr( 'rel', item.name )
-				// TODO: i18n time!
-				.append( $( '<span></span>' ).text( item.label ) );
-		} else {
-			// No label, must be a break
-			item.$ = $( '<div class="es-menuView-break"></div>' )
-				.attr( 'rel', item.name );
-		}
-		// TODO: Keyboard shortcut (and icons for them), support for keyboard accelerators, etc.
-	}
-	if ( before ) {
-		for ( var i = 0; i < this.items.length; i++ ) {
-			if ( this.items[i].name === before ) {
-				this.items.splice( i, 0, item );
-				this.items[i].$.before( item.$ );
-				return;
-			}
-		}
-	}
-	this.items.push( item );
-	this.$.append( item.$ );
-};
-
-es.MenuView.prototype.removeItem = function( name ) {
-	for ( var i = 0; i < this.items.length; i++ ) {
-		if ( this.items[i].name === name ) {
-			this.items.splice( i, 1 );
-			i--;
-		}
-	}
-};
-
-es.MenuView.prototype.getItems = function() {
-	return this.items;
-};
-
-es.MenuView.prototype.setPosition = function( position ) {
-	return this.$.css( { 'top': position.top, 'left': position.left } );
-};
-
-es.MenuView.prototype.open = function() {
-	this.$.show();
-};
-
-es.MenuView.prototype.close = function() {
-	this.$.hide();
-};
-
-es.MenuView.prototype.isOpen = function() {
-	return this.$.is( ':visible' );
-};
-
-es.MenuView.prototype.onSelect = function( item, event ) {
-	if ( typeof item.callback === 'function' ) {
-		item.callback( item );
-	} else if ( typeof this.callback === 'function' ) {
-		this.callback( item );
-	}
-	this.close();
-};
-/**
- * Creates an es.TableCellView object.
- * 
- * @class
- * @constructor
- * @extends {es.DocumentViewBranchNode}
- * @param {es.TableCellModel} model Table cell model to view
- */
-es.TableCellView = function( model ) {
-	// Inheritance
-	es.DocumentViewBranchNode.call( this, model, $( '<td>' ) );
-
-	// DOM Changes
-	this.$
-		.attr( 'style', model.getElementAttribute( 'html/style' ) )
-		.addClass( 'es-tableCellView' );
-};
-
-/* Registration */
-
-es.DocumentView.splitRules.tableCell = {
-	'self': false,
-	'children': true
-};
-
-/* Inheritance */
-
-es.extendClass( es.TableCellView, es.DocumentViewBranchNode );
-// ToolbarView
-es.ToolbarView = function( $container, surfaceView, config ) {
-	// Inheritance TODO: Do we still need it?
-	es.EventEmitter.call( this );
-	if ( !surfaceView ) {
-		return;
-	}
-
-	// References for use in closures
-	var	_this = this,
-		$window = $( window );	
-
-	// Properties
-	this.surfaceView = surfaceView;
-	this.$ = $container;
-	this.$groups = $( '<div class="es-toolbarGroups"></div>' ).prependTo( this.$ );
-	this.tools = [];
-
-	this.surfaceView.on( 'cursor', function( annotations, nodes ) {
-		for( var i = 0; i < _this.tools.length; i++ ) {
-			_this.tools[i].updateState( annotations, nodes );
-		}
-	} );
-
-	this.config = config || [
-		{ 'name': 'history', 'items' : ['undo', 'redo'] },
-		{ 'name': 'textStyle', 'items' : ['format'] },
-		{ 'name': 'textStyle', 'items' : ['strong', 'em', 'del', 'link', 'clear'] },
-		{ 'name': 'list', 'items' : ['number', 'bullet', 'outdent', 'indent'] }
-	];
-	this.setup();
-};
-
-/* Methods */
-
-es.ToolbarView.prototype.getSurfaceView = function() {
-	return this.surfaceView;
-};
-
-es.ToolbarView.prototype.setup = function() {
-	for ( var i = 0; i < this.config.length; i++ ) {
-		var	$group = $( '<div>' )
-			.addClass( 'es-toolbarGroup' )
-			.addClass( 'es-toolbarGroup-' + this.config[i].name );
-		if ( this.config[i].label ) {
-			$group.append(
-				$( '<div>' ).addClass( 'es-toolbarLabel' ).html( this.config[i].label )
-			);
-		}
-
-		for ( var j = 0; j < this.config[i].items.length; j++ ) {
-			var toolDefintion = es.Tool.tools[ this.config[i].items[j] ];
-			
-			if ( toolDefintion ) {
-				var tool = new toolDefintion.constructor(
-					this, toolDefintion.name, toolDefintion.title, toolDefintion.data
-				);
-				this.tools.push( tool );
-				$group.append( tool.$ );
-			}
-		}
-
-		this.$groups.append( $group ); 
-	}
-};
-
-es.extendClass( es.ToolbarView, es.EventEmitter );
-/**
  * Creates an es.ContextView object.
  * 
  * @class
@@ -9063,6 +8634,103 @@ es.ContextView.prototype.removeInspector = function( name ) {
 	this.inspector = null;
 };
 /**
+ * Creates an es.DocumentView object.
+ * 
+ * @class
+ * @constructor
+ * @extends {es.DocumentViewBranchNode}
+ * @param {es.DocumentModel} documentModel Document model to view
+ * @param {es.SurfaceView} surfaceView Surface view this view is a child of
+ */
+es.DocumentView = function( model, surfaceView ) {
+	// Inheritance
+	es.DocumentViewBranchNode.call( this, model );
+
+	// Properties
+	this.surfaceView = surfaceView;
+
+	// DOM Changes
+	this.$.addClass( 'es-documentView' );
+};
+
+/* Static Members */
+
+
+/**
+ * Mapping of symbolic names and splitting rules.
+ * 
+ * Each rule is an object with a self and children property. Each of these properties may contain
+ * one of two possible values:
+ *     Boolean - Whether a split is allowed
+ *     Null - Node is a leaf, so there's nothing to split
+ * 
+ * @example Paragraph rules
+ *     {
+ *         'self': true
+ *         'children': null
+ *     }
+ * @example List rules
+ *     {
+ *         'self': false,
+ *         'children': true
+ *     }
+ * @example ListItem rules
+ *     {
+ *         'self': true,
+ *         'children': false
+ *     }
+ */
+es.DocumentView.splitRules = {};
+
+/* Methods */
+
+/**
+ * Get the document offset of a position created from passed DOM event
+ * 
+ * @method
+ * @param e {Event} Event to create es.Position from
+ * @returns {Integer} Document offset
+ */
+es.DocumentView.prototype.getOffsetFromEvent = function( e ) {
+	var position = es.Position.newFromEventPagePosition( e );
+	return this.getOffsetFromRenderedPosition( position );
+};
+
+es.DocumentView.splitRules.document = {
+	'self': false,
+	'children': true
+};
+
+/* Inheritance */
+
+es.extendClass( es.DocumentView, es.DocumentViewBranchNode );
+/**
+ * Creates an es.ParagraphView object.
+ * 
+ * @class
+ * @constructor
+ * @extends {es.DocumentViewLeafNode}
+ * @param {es.ParagraphModel} model Paragraph model to view
+ */
+es.ParagraphView = function( model ) {
+	// Inheritance
+	es.DocumentViewLeafNode.call( this, model );
+
+	// DOM Changes
+	this.$.addClass( 'es-paragraphView' );
+};
+
+/* Registration */
+
+es.DocumentView.splitRules.paragraph = {
+	'self': true,
+	'children': null
+};
+
+/* Inheritance */
+
+es.extendClass( es.ParagraphView, es.DocumentViewLeafNode );
+/**
  * Creates an es.PreView object.
  * 
  * @class
@@ -9088,6 +8756,338 @@ es.DocumentView.splitRules.pre = {
 /* Inheritance */
 
 es.extendClass( es.PreView, es.DocumentViewLeafNode );
+/**
+ * Creates an es.ListView object.
+ * 
+ * @class
+ * @constructor
+ * @extends {es.DocumentViewBranchNode}
+ * @param {es.ListModel} model List model to view
+ */
+es.ListView = function( model ) {
+	// Inheritance
+	es.DocumentViewBranchNode.call( this, model );
+
+	// DOM Changes
+	this.$.addClass( 'es-listView' );
+
+	// Events
+	var _this = this;
+	this.model.on( 'update', function() {
+		_this.enumerate();
+	} );
+
+	// Initialization
+	this.enumerate();
+};
+
+/* Methods */
+
+/**
+ * Set the number labels of all ordered list items.
+ * 
+ * @method
+ */
+es.ListView.prototype.enumerate = function() {
+	var styles,
+		levels = [];
+	for ( var i = 0; i < this.children.length; i++ ) {
+		styles = this.children[i].model.getElementAttribute( 'styles' );
+		levels = levels.slice( 0, styles.length );
+		if ( styles[styles.length - 1] === 'number' ) {
+			if ( !levels[styles.length - 1] ) {
+				levels[styles.length - 1] = 0;
+			}
+			this.children[i].$icon.text( ++levels[styles.length - 1] + '.' );
+		} else {
+			this.children[i].$icon.text( '' );
+			if ( levels[styles.length - 1] ) {
+				levels[styles.length - 1] = 0;
+			}
+		}
+	}
+};
+
+/* Registration */
+
+es.DocumentView.splitRules.list = {
+	'self': false,
+	'children': true
+};
+
+/* Inheritance */
+
+es.extendClass( es.ListView, es.DocumentViewBranchNode );
+/**
+ * Creates an es.MenuView object.
+ * 
+ * @class
+ * @constructor
+ * @param {Object[]} items List of items to append initially
+ * @param {Function} callback Function to call if an item doesn't have it's own callback
+ * @param {jQuery} [$overlay=$( 'body' )] DOM selection to add nodes to
+ */
+es.MenuView = function( items, callback, $overlay ) {
+	// Properties
+	this.$ = $( '<div class="es-menuView"></div>' ).appendTo( $overlay || $( 'body' ) );
+	this.items = [];
+	this.autoNamedBreaks = 0;
+	this.callback = callback;
+
+	// Items
+	if ( es.isArray( items ) ) {
+		for ( var i = 0; i < items.length; i++ ) {
+			this.addItem( items[i] );
+		}
+	}
+
+	// Events
+	var _this = this;
+	this.$.bind( {
+		'mousedown': function( e ) {
+			if ( e.which === 1 ) {
+				e.preventDefault();
+				return false;
+			}
+		},
+		'mouseup': function( e ) {
+			if ( e.which === 1 ) {
+				var $item = $( e.target ).closest( '.es-menuView-item' );
+				if ( $item.length ) {
+					var name = $item.attr( 'rel' );
+					for ( var i = 0; i < _this.items.length; i++ ) {
+						if ( _this.items[i].name === name ) {
+							_this.onSelect( _this.items[i], e );
+							return true;
+						}
+					}
+				}
+			}
+		}
+	} );
+};
+
+/* Methods */
+
+es.MenuView.prototype.addItem = function( item, before ) {
+	if ( item === '-' ) {
+		item = {
+			'name': 'break-' + this.autoNamedBreaks++
+		};
+	}
+	// Items that don't have custom DOM elements will be auto-created
+	if ( !item.$ ) {
+		if ( !item.name ) {
+			throw 'Invalid menu item error. Items must have a name property.';
+		}
+		if ( item.label ) {
+			item.$ = $( '<div class="es-menuView-item"></div>' )
+				.attr( 'rel', item.name )
+				// TODO: i18n time!
+				.append( $( '<span></span>' ).text( item.label ) );
+		} else {
+			// No label, must be a break
+			item.$ = $( '<div class="es-menuView-break"></div>' )
+				.attr( 'rel', item.name );
+		}
+		// TODO: Keyboard shortcut (and icons for them), support for keyboard accelerators, etc.
+	}
+	if ( before ) {
+		for ( var i = 0; i < this.items.length; i++ ) {
+			if ( this.items[i].name === before ) {
+				this.items.splice( i, 0, item );
+				this.items[i].$.before( item.$ );
+				return;
+			}
+		}
+	}
+	this.items.push( item );
+	this.$.append( item.$ );
+};
+
+es.MenuView.prototype.removeItem = function( name ) {
+	for ( var i = 0; i < this.items.length; i++ ) {
+		if ( this.items[i].name === name ) {
+			this.items.splice( i, 1 );
+			i--;
+		}
+	}
+};
+
+es.MenuView.prototype.getItems = function() {
+	return this.items;
+};
+
+es.MenuView.prototype.setPosition = function( position ) {
+	return this.$.css( { 'top': position.top, 'left': position.left } );
+};
+
+es.MenuView.prototype.open = function() {
+	this.$.show();
+};
+
+es.MenuView.prototype.close = function() {
+	this.$.hide();
+};
+
+es.MenuView.prototype.isOpen = function() {
+	return this.$.is( ':visible' );
+};
+
+es.MenuView.prototype.onSelect = function( item, event ) {
+	if ( typeof item.callback === 'function' ) {
+		item.callback( item );
+	} else if ( typeof this.callback === 'function' ) {
+		this.callback( item );
+	}
+	this.close();
+};
+/**
+ * Creates an es.ListItemView object.
+ * 
+ * @class
+ * @constructor
+ * @extends {es.DocumentViewLeafNode}
+ * @param {es.ListItemModel} model List item model to view
+ */
+es.ListItemView = function( model ) {
+	// Inheritance
+	es.DocumentViewBranchNode.call( this, model );
+
+	// Properties
+	this.$icon = $( '<div class="es-listItemView-icon"></div>' ).prependTo( this.$ );
+	this.currentStylesHash = null;
+	
+	// DOM Changes
+	this.$.addClass( 'es-listItemView' );
+
+	// Events
+	var _this = this;
+	this.model.on( 'update', function() {
+		_this.setClasses();
+	} );
+
+	// Initialization
+	this.setClasses();
+};
+
+/* Methods */
+
+es.ListItemView.prototype.setClasses = function() {
+	var styles = this.model.getElementAttribute( 'styles' ),
+		stylesHash = styles.join( '|' );
+	if ( this.currentStylesHash !== stylesHash ) {
+		this.currentStylesHash = stylesHash;
+		var classes = this.$.attr( 'class' );
+		this.$
+			// Remove any existing level classes
+			.attr(
+				'class',
+				classes
+					.replace( / ?es-listItemView-level[0-9]+/, '' )
+					.replace( / ?es-listItemView-(bullet|number|term|definition)/, '' )
+			)
+			// Set the list style class from the style on top of the stack
+			.addClass( 'es-listItemView-' + styles[styles.length - 1] )
+			// Set the list level class from the length of the stack
+			.addClass( 'es-listItemView-level' + ( styles.length - 1 ) );
+	}
+};
+
+/* Registration */
+
+es.DocumentView.splitRules.listItem = {
+	'self': true,
+	'children': false
+};
+
+/* Inheritance */
+
+es.extendClass( es.ListItemView, es.DocumentViewBranchNode );
+/**
+ * Creates an es.TableView object.
+ * 
+ * @class
+ * @constructor
+ * @extends {es.DocumentViewBranchNode}
+ * @param {es.TableModel} model Table model to view
+ */
+es.TableView = function( model ) {
+	// Inheritance
+	es.DocumentViewBranchNode.call( this, model, $( '<table>' ) );
+	
+	// DOM Changes
+	this.$
+		.attr( 'style', model.getElementAttribute( 'html/style' ) )
+		.addClass( 'es-tableView' );
+};
+
+/* Registration */
+
+es.DocumentView.splitRules.table = {
+	'self': false,
+	'children': false
+};
+
+/* Inheritance */
+
+es.extendClass( es.TableView, es.DocumentViewBranchNode );
+/**
+ * Creates an es.TableRowView object.
+ * 
+ * @class
+ * @constructor
+ * @extends {es.DocumentViewBranchNode}
+ * @param {es.TableRowModel} model Table row model to view
+ */
+es.TableRowView = function( model ) {
+	// Inheritance
+	es.DocumentViewBranchNode.call( this, model, $( '<tr>' ), true );
+	
+	// DOM Changes
+	this.$
+		.attr( 'style', model.getElementAttribute( 'html/style' ) )
+		.addClass( 'es-tableRowView' );
+};
+
+/* Registration */
+
+es.DocumentView.splitRules.tableRow = {
+	'self': false,
+	'children': false
+};
+
+/* Inheritance */
+
+es.extendClass( es.TableRowView, es.DocumentViewBranchNode );
+/**
+ * Creates an es.TableCellView object.
+ * 
+ * @class
+ * @constructor
+ * @extends {es.DocumentViewBranchNode}
+ * @param {es.TableCellModel} model Table cell model to view
+ */
+es.TableCellView = function( model ) {
+	// Inheritance
+	es.DocumentViewBranchNode.call( this, model, $( '<td>' ) );
+
+	// DOM Changes
+	this.$
+		.attr( 'style', model.getElementAttribute( 'html/style' ) )
+		.addClass( 'es-tableCellView' );
+};
+
+/* Registration */
+
+es.DocumentView.splitRules.tableCell = {
+	'self': false,
+	'children': true
+};
+
+/* Inheritance */
+
+es.extendClass( es.TableCellView, es.DocumentViewBranchNode );
 /**
  * Creates an es.HeadingView object.
  * 
