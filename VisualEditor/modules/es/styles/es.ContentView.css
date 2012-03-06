@@ -65,6 +65,10 @@
 	font-weight: bold;
 }
 
+.es-contentView-format-textStyle-delete {
+	text-decoration: line-through;
+}
+
 .es-contentView-format-link {
 	color: #0645AD;
 	text-decoration: underline;

@@ -98,6 +98,10 @@ es.ContentView.annotationRenderers = {
 		'open': '<span class="es-contentView-format-textStyle-emphasize">',
 		'close': '</span>'
 	},
+	'textStyle/delete': {
+		'open': '<span class="es-contentView-format-textStyle-delete">',
+		'close': '</span>'
+	},
 	'textStyle/big': {
 		'open': '<span class="es-contentView-format-textStyle-big">',
 		'close': '</span>'

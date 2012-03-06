@@ -75,6 +75,9 @@
 .es-toolbarButtonTool-em:before {
 	background-image: url(../images/italic.png);
 }
+.es-toolbarButtonTool-del:before {
+	background-image: url(../images/del.png);
+}
 .es-toolbarButtonTool-link:before {
 	background-image: url(../images/link.png);
 }
@@ -134,27 +137,27 @@
 .es-menuView-item[rel="heading-1"] span {
 	font-size: 188%;
 	font-weight: normal;
-	
+
 }
 .es-menuView-item[rel="heading-2"] span {
 	font-size: 150%;
 	font-weight: normal;
-	
+
 }
 .es-menuView-item[rel="heading-3"] span {
 	font-size: 132%;
 	font-weight: bold;
-	
+
 }
 .es-menuView-item[rel="heading-4"] span {
 	font-size: 116%;
 	font-weight: bold;
-	
+
 }
 .es-menuView-item[rel="heading-5"] span {
 	font-size: 100%;
 	font-weight: bold;
-	
+
 }
 .es-menuView-item[rel="heading-6"] span {
 	font-size: 80%;

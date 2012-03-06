@@ -96,6 +96,14 @@ es.Tool.tools.em = {
 		'annotation': { 'type': 'textStyle/emphasize' }
 	}
 };
+es.Tool.tools.del = {
+	'constructor': es.AnnotationButtonTool,
+	'name': 'del',
+	'title': 'Del (ctrl/cmd + D)',
+	'data': {
+		'annotation': { 'type': 'textStyle/delete' }
+	}
+};
 
 /* Inheritance */
 
