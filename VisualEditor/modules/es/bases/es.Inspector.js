@@ -71,7 +71,7 @@ es.Inspector.prototype.close = function( accept ) {
     }
     catch (e)
     {
-        console.error(e);
+        
     }
 };
 
