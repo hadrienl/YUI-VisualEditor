@@ -6545,8 +6545,38 @@ es.SurfaceView = function( $container, model ) {
 			},
 			'paste': function() {
 				setTimeout( function() {
+				    var val = _this.$input.val(),
+				        chars = val.split(''),
+				        paragraph = '',
+				        c;
+				    
 					_this.model.breakpoint();
-					_this.insertFromInput();
+					/**
+					 * Create paragraphes from double \n
+					 */
+					for (var i = 0, len = chars.length; i < len; i++)
+					{
+					    c = chars[i+1];
+					    if (chars[i] !== '\n')
+					    {
+					        paragraph+=chars[i];
+				        }
+				        
+					    if (!c ||
+					        c === '\n')
+					    {
+					        _this.$input.val(paragraph);
+    					    _this.insertFromInput();
+    					    
+    					    if (c === '\n' &&
+					            paragraph.length)
+					        {
+					            _this.handleEnter();
+					        }
+					        
+    					    paragraph = '';
+					    }
+					}
 					_this.model.breakpoint();
 				}, 0 );
 			}
@@ -7650,7 +7680,7 @@ es.ContentView.htmlCharacters = {
 	'>': '&gt;',
 	'\'': '&#039;',
 	'"': '&quot;',
-	'\n': '<span class="es-contentView-whitespace">&#182;</span><br/>',
+	'\n': '<span class="es-contentView-whitespace">&#182;</span>',
 	'\t': '<span class="es-contentView-whitespace">&#8702;</span>',
 	' ': '&nbsp;'
 };
