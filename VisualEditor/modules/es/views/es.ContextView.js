@@ -24,7 +24,7 @@ es.ContextView = function( surfaceView, $overlay ) {
 	this.toolbarView = new es.ToolbarView(
 		this.$toolbar,
 		this.surfaceView,
-		[{ 'name': 'textStyle', 'items' : [ 'strong', 'em', 'link', 'clear' ] }]
+		[{ 'name': 'textStyle', 'items' : [ 'strong', 'em', 'del', 'link', 'clear' ] }]
 	);
 	this.menuView = new es.MenuView( [
 			// Example menu items
