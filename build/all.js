@@ -6220,7 +6220,7 @@ es.IndentationButtonTool.prototype.updateState = function( annotations, nodes ) 
 
 /* Registration */
 
-es.Tool.tools.indent = {
+/*es.Tool.tools.indent = {
 	'constructor': es.IndentationButtonTool,
 	'name': 'indent',
 	'title': 'Increase indentation'
@@ -6230,7 +6230,7 @@ es.Tool.tools.outdent = {
 	'constructor': es.IndentationButtonTool,
 	'name': 'outdent',
 	'title': 'Reduce indentation'
-};
+};*/ // Disabled because it doen't work
 
 /* Inheritance */
 
@@ -7419,6 +7419,11 @@ es.SurfaceView.prototype.showCursor = function() {
 		position = this.documentView.getRenderedPositionFromOffset(
 			this.currentSelection.to, this.cursor.initialBias
 		);
+
+	if (!position)
+	{
+	    return;
+	}
 	
 	this.$cursor.css( {
 		'left': position.left,

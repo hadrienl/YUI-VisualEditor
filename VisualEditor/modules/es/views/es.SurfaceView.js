@@ -1002,6 +1002,11 @@ es.SurfaceView.prototype.showCursor = function() {
 		position = this.documentView.getRenderedPositionFromOffset(
 			this.currentSelection.to, this.cursor.initialBias
 		);
+
+	if (!position)
+	{
+	    return;
+	}
 	
 	this.$cursor.css( {
 		'left': position.left,
