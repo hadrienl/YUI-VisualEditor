@@ -6423,6 +6423,7 @@ es.extendClass( es.FormatDropdownTool, es.DropdownTool );
  * @param {jQuery} $container DOM Container to render surface into
  * @param {es.SurfaceModel} model Surface model to view
  */
+
 es.SurfaceView = function( $container, model ) {
 	// Inheritance
 	es.EventEmitter.call( this );
@@ -6928,8 +6929,8 @@ es.SurfaceView.prototype.onPaste = function( e ) {
 	// TODO: Check if the data copy is the same as what got pasted, and use that instead if so
 	return true;
 };
-
 es.SurfaceView.prototype.onKeyDown = function( e ) {
+    
 	switch ( e.keyCode ) {
 		// Tab
 		case 9:
@@ -7062,6 +7063,7 @@ es.SurfaceView.prototype.onKeyDown = function( e ) {
 						return false;
 					// a (select all)
 					case 65:
+					
 						this.model.select( new es.Range(
 							this.model.getDocument().getRelativeContentOffset( 0, 1 ),
 							this.model.getDocument().getRelativeContentOffset(
@@ -7091,25 +7093,54 @@ es.SurfaceView.prototype.onKeyDown = function( e ) {
 							}
 						}
 						return false;
+					case 13:
+					    this.keyboard.keys.shift = false;
+                		if ( this.keyboard.selecting ) {
+                			this.keyboard.selecting = false;
+                		}
+                		return false;
 				}
 			}
 			// Regular text insertion
-			this.handleInsert();
+			if (this.mac)
+			{
+			    /*
+			     * On mac, we have to handle insert on key up to watch
+			     * keyIdentifier property and know if we have a dead key (^,¨,etc)
+			     */
+			    this.handleInsert();
+		    }
 			break;
 	}
 	return true;
 };
 
 es.SurfaceView.prototype.onKeyUp = function( e ) {
+    
+    if (this.mac &&
+        e.originalEvent.keyIdentifier === 'Unidentified')
+    {
+        /**
+         * On Mac, dead keys fires key* events. We have to ignore them if they
+         * are not associated with a final caracter
+         */
+        return;
+    }
+    
 	if ( e.keyCode === 16 ) {
 		this.keyboard.keys.shift = false;
 		if ( this.keyboard.selecting ) {
 			this.keyboard.selecting = false;
 		}
 	}
+	else if (this.mac)
+	{
+	    this.handleInsert();
+	}
 };
 
 es.SurfaceView.prototype.handleInsert = function() {
+    
 	var _this = this;
 	if ( _this.keyboard.keydownTimeout ) {
 		clearTimeout( _this.keyboard.keydownTimeout );
@@ -7243,6 +7274,7 @@ es.SurfaceView.prototype.handleEnter = function() {
 es.SurfaceView.prototype.insertFromInput = function() {
 	var selection = this.currentSelection.clone(),
 		val = this.$input.val();
+	
 	if ( val.length > 0 ) {
 		// Check if there was any effective input
 		var input = this.$input[0],
