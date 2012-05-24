@@ -685,7 +685,7 @@ es.SurfaceView.prototype.onKeyDown = function( e ) {
 				}
 			}
 			// Regular text insertion
-			if (this.mac)
+			if (!this.mac)
 			{
 			    /*
 			     * On mac, we have to handle insert on key up to watch
