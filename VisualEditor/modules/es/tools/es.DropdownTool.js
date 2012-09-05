@@ -22,7 +22,7 @@ es.DropdownTool = function( toolbar, name, title, items ) {
 		 * START MODIF Yannick for trad
 		 */
 		//_this.$label.text( item.label );
-		var label = item.$.html();
+		var label = item.$.text();
 		_this.$label.text( label );
 		/**
 		 * END MODIF Yannick for trad

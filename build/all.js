@@ -6258,7 +6258,7 @@ es.DropdownTool = function( toolbar, name, title, items ) {
 		 * START MODIF Yannick for trad
 		 */
 		//_this.$label.text( item.label );
-		var label = item.$.html();
+		var label = item.$.text();
 		_this.$label.text( label );
 		/**
 		 * END MODIF Yannick for trad
@@ -6409,7 +6409,7 @@ es.FormatDropdownTool.prototype.updateState = function( annotations, nodes ) {
 				 * START MODIF Yannick for trad
 				 */
 				//this.$label.text( items[i].label );
-				var label = items[i].$.html();
+				var label = items[i].$.text();
 				this.$label.text( label );
 				/**
 				 * END MODIF Yannick for trad

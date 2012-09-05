@@ -102,7 +102,7 @@ es.FormatDropdownTool.prototype.updateState = function( annotations, nodes ) {
 				 * START MODIF Yannick for trad
 				 */
 				//this.$label.text( items[i].label );
-				var label = items[i].$.html();
+				var label = items[i].$.text();
 				this.$label.text( label );
 				/**
 				 * END MODIF Yannick for trad
