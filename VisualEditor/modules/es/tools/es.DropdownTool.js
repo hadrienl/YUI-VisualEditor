@@ -18,7 +18,15 @@ es.DropdownTool = function( toolbar, name, title, items ) {
 	var _this = this;
 	this.menuView = new es.MenuView( items, function( item ) {
 		_this.onSelect( item );
-		_this.$label.text( item.label );
+		/**
+		 * START MODIF Yannick for trad
+		 */
+		//_this.$label.text( item.label );
+		var label = item.$.html();
+		_this.$label.text( label );
+		/**
+		 * END MODIF Yannick for trad
+		 */
 	}, this.$ );
 	this.$label = $( '<div class="es-toolbarDropdownTool-label"></div>' ).appendTo( this.$ );
 

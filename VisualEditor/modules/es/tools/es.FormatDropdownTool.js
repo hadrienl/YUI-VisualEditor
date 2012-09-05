@@ -98,7 +98,15 @@ es.FormatDropdownTool.prototype.updateState = function( annotations, nodes ) {
 				format.type === items[i].type &&
 				es.compareObjects( format.attributes, items[i].attributes )
 			) {
-				this.$label.text( items[i].label );
+				/**
+				 * START MODIF Yannick for trad
+				 */
+				//this.$label.text( items[i].label );
+				var label = items[i].$.html();
+				this.$label.text( label );
+				/**
+				 * END MODIF Yannick for trad
+				 */
 				break;
 			}
 		}

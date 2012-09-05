@@ -6254,7 +6254,15 @@ es.DropdownTool = function( toolbar, name, title, items ) {
 	var _this = this;
 	this.menuView = new es.MenuView( items, function( item ) {
 		_this.onSelect( item );
-		_this.$label.text( item.label );
+		/**
+		 * START MODIF Yannick for trad
+		 */
+		//_this.$label.text( item.label );
+		var label = item.$.html();
+		_this.$label.text( label );
+		/**
+		 * END MODIF Yannick for trad
+		 */
 	}, this.$ );
 	this.$label = $( '<div class="es-toolbarDropdownTool-label"></div>' ).appendTo( this.$ );
 
@@ -6397,7 +6405,15 @@ es.FormatDropdownTool.prototype.updateState = function( annotations, nodes ) {
 				format.type === items[i].type &&
 				es.compareObjects( format.attributes, items[i].attributes )
 			) {
-				this.$label.text( items[i].label );
+				/**
+				 * START MODIF Yannick for trad
+				 */
+				//this.$label.text( items[i].label );
+				var label = items[i].$.html();
+				this.$label.text( label );
+				/**
+				 * END MODIF Yannick for trad
+				 */
 				break;
 			}
 		}
