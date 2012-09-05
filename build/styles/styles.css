@@ -122,9 +122,12 @@
 	font-size: 0.8em;
 	line-height: 24px;
 	padding-left: 0.75em;
-	padding-right: 24px;
+	/*padding-right: 24px;*/
+	padding-right: 12px;
+	margin-right:5px;
 	background-image: url(../images/arrow-down.png);
-	background-position: 9em center;
+	/*background-position: 9em center;*/
+	background-position: right center;
 	background-repeat: no-repeat;
 }
 .es-toolbarDropdownTool .es-menuView {
@@ -132,7 +135,8 @@
 	top: -1px;
 }
 .es-toolbarDropdownTool-format {
-	width: 8em;
+	/*width: 8em;*/
+	min-width: 8em;
 }
 .es-menuView-item[rel="heading-1"] span {
 	font-size: 188%;
