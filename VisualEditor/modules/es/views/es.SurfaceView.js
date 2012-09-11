@@ -1039,7 +1039,7 @@ es.SurfaceView.prototype.showCursor = function() {
 	{
 	    return;
 	}
-	
+    
 	this.$cursor.css( {
 		'left': position.left,
 		'top': position.top,
@@ -1049,15 +1049,6 @@ es.SurfaceView.prototype.showCursor = function() {
 		'top': position.top,
 		'height': position.bottom - position.top
 	});
-
-	// Auto scroll to cursor
-	var inputTop = this.$input.offset().top,
-		inputBottom = inputTop + position.bottom - position.top;	
-	if ( inputTop - this.dimensions.toolbarHeight < this.dimensions.scrollTop ) {
-		$window.scrollTop( inputTop - this.dimensions.toolbarHeight );
-	} else if ( inputBottom > ( this.dimensions.scrollTop + this.dimensions.height ) ) {
-		$window.scrollTop( inputBottom - this.dimensions.height );
-	}
 
 	// cursor blinking
 	if ( this.cursor.interval ) {
