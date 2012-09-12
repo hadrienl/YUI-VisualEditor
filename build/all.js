@@ -6505,10 +6505,22 @@ es.SurfaceView = function( $container, model ) {
 	// Events
 
 	this.model.on( 'select', function( selection ) {
-		// Keep a copy of the current selection on hand
+        
+        // Keep a copy of the current selection on hand
 		_this.currentSelection = selection.clone();
+        
+        if (!this._isLoaded)
+        {
+            // This shit is workaround to avoid editor to gain focus
+            // automatically and make the page scrolling
+            this._isLoaded = true;
+            _this.loadInsertionAnnotations();
+            return;
+        }
+        
 		// Respond to selection changes
 		_this.updateSelection();
+        
 		if ( selection.getLength() ) {
 			_this.$input.val( _this.documentView.model.getContentText( selection ) ).select();
 			_this.clearInsertionAnnotations();
