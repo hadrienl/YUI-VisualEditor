@@ -203,7 +203,7 @@ es.HtmlSerializer.prototype.transclusion = function( node ) {
 	}
 	title.push( node.title );
 	title = title.join( ':' );
-	return es.Html.makeTag( 'a', { 'href': '/wiki/' + title }, title );
+	return es.Html.makeTag( 'a', { 'href': title }, title );
 };
 
 es.HtmlSerializer.prototype.parameter = function( node ) {
@@ -221,7 +221,8 @@ es.HtmlSerializer.prototype.content = function( node ) {
 				'textStyle/big': 'big',
 				'textStyle/small': 'small',
 				'textStyle/superScript': 'sup',
-				'textStyle/subScript': 'sub'
+				'textStyle/subScript': 'sub',
+                'textStyle/delete': 'del'
 			};
 		for ( var i = 0, length = node.annotations.length; i < length; i++ ) {
 			var annotation = node.annotations[i];
