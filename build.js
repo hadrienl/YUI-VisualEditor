@@ -5,7 +5,7 @@ exec = require('child_process').exec,
 
 BASEPATH = __dirname+'/VisualEditor/modules/',
 BUILDDIR = __dirname+'/build/',
-YUICOMPRESSORPATH = __dirname+'/../../OverblogAssets/yuicompressor/build/yuicompressor-2.4.8pre.jar',
+YUICOMPRESSORPATH = __dirname+'/../yuicompressor/build/yuicompressor-2.4.8pre.jar',
 
 jquery = 'jquery',
 modules = ['es/es.js',
